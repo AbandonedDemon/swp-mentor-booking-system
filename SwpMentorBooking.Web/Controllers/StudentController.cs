@@ -208,7 +208,9 @@ namespace SwpMentorBooking.Web.Controllers
                     Date = currentMonday.AddDays(i).ToDateTime(TimeOnly.MinValue),
                     MentorSchedules = mentorScheduleVM
                         .Where(s => s.Date.Date == currentMonday.AddDays(i).ToDateTime(TimeOnly.MinValue).Date)
-                        .ToList()
+                        .ToList(),
+                    IsPastDay = currentMonday.AddDays(i) < DateOnly.FromDateTime(DateTime.Now)
+
                 }).ToList()
             };
 

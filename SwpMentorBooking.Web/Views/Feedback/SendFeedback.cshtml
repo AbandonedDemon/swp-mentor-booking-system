@@ -1,4 +1,5 @@
 ﻿@model FeedbackVM
+<link rel="stylesheet" href="/css/feedback/rating.css" />
 
 <a asp-controller="Booking" asp-action=@(User.FindFirst(ClaimTypes.Role)?.Value == "Student" ?
    "ViewStudentBookings" : "ViewMentorBookings") class="btn btn-primary mt-3">
@@ -7,30 +8,34 @@
 
 <div class="card mb-4">
     <div class="card-body">
-        <h2>Send Feedback</h2>
+        <h2>
+            Send Feedback to @(Model.IsMentorFeedback ?
+            $"Group: {Model.GroupName}" :
+            $"Mentor: {Model.MentorName}")
+        </h2>
     </div>
     <div class="card-body">
         <form asp-action="SendFeedback" asp-controller="Feedback" method="post">
             <input type="hidden" asp-for="BookingId" value="@Model.BookingId" />
             <input type="hidden" asp-for="GivenBy" value="@Model.GivenBy" />
             <input type="hidden" asp-for="GivenTo" value="@Model.GivenTo" />
-
-            <div class="form-group">
-                <label asp-for="Rating">Rating:</label>
-                <div class="star-rating">
-                    <input asp-for=Rating type="radio" id="star1" name="rating" value="5" />
-                    <label for="star1" class="star">★</label>
-                    <input asp-for=Rating type="radio" id="star2" name="rating" value="4" />
-                    <label for="star2" class="star">★</label>
-                    <input asp-for=Rating type="radio" id="star3" name="rating" value="3" />
-                    <label for="star3" class="star">★</label>
-                    <input asp-for=Rating type="radio" id="star4" name="rating" value="2" />
-                    <label for="star4" class="star">★</label>
-                    <input asp-for=Rating type="radio" id="star5" name="rating" value="1" />
-                    <label for="star5" class="star">★</label>
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div class="form-group">
+                    <label asp-for="Rating">Rating:</label>
+                    <div class="star-rating">
+                        <input asp-for=Rating type="radio" id="star1" name="rating" value="5" />
+                        <label for="star1" class="star">★</label>
+                        <input asp-for=Rating type="radio" id="star2" name="rating" value="4" />
+                        <label for="star2" class="star">★</label>
+                        <input asp-for=Rating type="radio" id="star3" name="rating" value="3" />
+                        <label for="star3" class="star">★</label>
+                        <input asp-for=Rating type="radio" id="star4" name="rating" value="2" />
+                        <label for="star4" class="star">★</label>
+                        <input asp-for=Rating type="radio" id="star5" name="rating" value="1" />
+                        <label for="star5" class="star">★</label>
+                    </div>
                 </div>
             </div>
-
             <div class="form-group">
                 <label asp-for="Comment">Comment:</label>
                 <textarea asp-for="Comment" class="form-control"></textarea>
@@ -40,29 +45,5 @@
         </form>
     </div>
 </div>
-<style>
-    .star-rating {
-        direction: ltr;
-        display: flex;
-    }
 
-        .star-rating input {
-            display: none; /* Hide the radio buttons */
-        }
-
-        .star-rating label {
-            font-size: 30px;
-            color: gray; /* Default color for stars */
-            cursor: pointer;
-        }
-
-        .star-rating input:checked ~ label {
-            color: gold; /* Color for selected stars */
-        }
-
-        .star-rating label:hover,
-        .star-rating label:hover ~ label {
-            color: gold; /* Color for hover effect */
-        }
-
-</style>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

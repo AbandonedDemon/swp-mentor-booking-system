@@ -26,13 +26,25 @@
                     var currentSchedule = schedules?.FirstOrDefault(ms => ms.SlotId == slot.Id);
 
                     <td>
-                        @if (currentSchedule != null && currentSchedule.Status == "available")
-                        {
-                            <span class="badge bg-success">Available</span>
+                        @{
+                            var currentDate = Model.WeekStartDate.AddDays(day);
+
+                            var isPastDay = Model.DailySchedules[day].IsPastDay;
+
+                            var isPastSlot = isPastDay || (currentDate.Date == DateTime.Today && DateTime.Now.TimeOfDay > slot.EndTime.ToTimeSpan());
                         }
-                        else if (currentSchedule != null && currentSchedule.Status == "booked")
+
+
+                        @if (currentSchedule != null && !isPastSlot)
                         {
-                            <span class="badge bg-danger">Booked</span>
+                            @if (currentSchedule.Status == "available")
+                            {
+                                <span class="badge bg-success">Available</span>
+                            }
+                            else if (currentSchedule.Status == "booked")
+                            {
+                                <span class="badge bg-danger">Booked</span>
+                            }
                         }
                         else
                         {

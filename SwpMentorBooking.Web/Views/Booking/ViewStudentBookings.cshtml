@@ -62,7 +62,7 @@
                     }
                     @if (booking.IsFeedbackable)
                     {
-                        <a asp-controller="Feedback" asp-action="SendFeedback" asp-route-bookingId="@booking.BookingId"
+                        <a asp-controller="Feedback" asp-action="SendFeedbackStudent" asp-route-bookingId="@booking.BookingId"
                            class="btn btn-warning btn-sm">Send Feedback</a>
                     }
                 </td>

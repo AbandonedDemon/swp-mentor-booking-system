@@ -1,5 +1,8 @@
 ﻿@model BookingDetailVM
 
+@{
+    var userRole = @User.FindFirst(ClaimTypes.Role)?.Value;
+}
 <h2>Booking Details</h2>
 <a asp-action=@(User.FindFirst(ClaimTypes.Role)?.Value == "Student" ?
    "ViewStudentBookings" : "ViewMentorBookings") class="btn btn-primary mt-3">
@@ -32,7 +35,7 @@
         }
         @if (Model.IsFeedbackable)
         {
-            <a asp-controller="Feedback" asp-action="SendFeedback" asp-route-bookingId="@Model.BookingId"
+            <a asp-controller="Feedback" asp-action=@("SendFeedback" + userRole) asp-route-bookingId="@Model.BookingId"
             class="btn btn-warning btn-sm">Send Feedback</a>
         }
     </div>

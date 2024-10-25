@@ -41,20 +41,17 @@
                         @if (currentSchedule != null)
                         {
                             <div class="status-slot">
-                                @if (currentSchedule.Status == "available")
+                                @if (currentSchedule.Status == "available" && !isPastSlot)
 
                                 {
                                     <span class="badge bg-success">Available</span>
-                                    @if (!isPastSlot)
-
-                                    {
+                                    
                                         <form method="post" asp-action="ToggleSlotAvailability">
                                             <input type="hidden" name="mentorScheduleId" value="@currentSchedule.Id" />
                                             <input type="hidden" name="slotId" value="@slot.Id" />
                                             <input type="hidden" name="date" value="@Model.WeekStartDate.AddDays(day).ToString("yyyy-MM-dd")" />
                                             <button type="submit" class="btn btn-sm btn-warning">Mark as Unavailable</button>
                                         </form>
-                                    }
                                 }
                                 else if (currentSchedule.Status == "booked")
 
@@ -98,5 +95,6 @@
             </tr>
         }
     </tbody>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </table>
 

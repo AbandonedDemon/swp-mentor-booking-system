@@ -37,15 +37,22 @@
                                 data-slot="@slot.Id"
                                 data-start-time="@slot.StartTime"
                                 data-end-time="@slot.EndTime"
-                                data-status="@(currentSchedule?.Status ?? "unavailable")"
+                                data-status="@(!isPastSlot ? currentSchedule?.Status : "unavailable")"
                                 data-is-past-slot="@(isPastSlot.ToString().ToLower())">
-                                @if (currentSchedule != null && currentSchedule.Status == "available" && !currentSchedule.IsPastSlot)
+                                @if (currentSchedule != null && !isPastSlot)
                                 {
-                                    <span class="badge bg-success">Available</span>
-                                }
-                                else if (currentSchedule != null && currentSchedule.Status == "booked")
-                                {
-                                    <span class="badge bg-danger">Booked</span>
+                                    @if (currentSchedule.Status == "available")
+                                    {
+                                        <span class="badge bg-success">Available</span>
+                                    }
+                                    else if (currentSchedule.Status == "booked")
+                                    {
+                                        <span class="badge bg-danger">Booked</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">Unavailable</span>
+                                    }
                                 }
                                 else
                                 {

@@ -18,8 +18,8 @@ namespace SwpMentorBooking.Web.Controllers
             _unitOfWork = unitOfWork;
         }
 
-        [HttpGet("send/{bookingId}")]
-        public IActionResult SendFeedback(int bookingId)
+        [HttpGet("send-student/{bookingId}")]
+        public IActionResult SendFeedbackStudent(int bookingId)
         {
             // Retrieve current user's info
             var userEmail = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -32,7 +32,7 @@ namespace SwpMentorBooking.Web.Controllers
             }
             // Retrieve current booking info
             Booking booking = _unitOfWork.Booking.Get(b => b.Id == bookingId && b.Status == "completed",
-                includeProperties: "MentorSchedule.MentorDetail.User,Leader.User");
+                includeProperties: "MentorSchedule.MentorDetail.User,Leader.User,Leader.Group");
 
             if (booking is null)
             {
@@ -44,7 +44,7 @@ namespace SwpMentorBooking.Web.Controllers
             if (existingFeedback is not null)
             {
                 TempData["error"] = "You have already submitted feedback for this booking.";
-                return RedirectToAction("ViewBookingDetail", "Booking", new { bookingId });
+                return RedirectToAction("ViewStudentBookings", "Booking");
             }
 
             // Populate the View model for display
@@ -52,10 +52,63 @@ namespace SwpMentorBooking.Web.Controllers
             {
                 BookingId = bookingId,
                 GivenBy = user.Id,
-                GivenTo = booking.MentorSchedule.MentorDetail.UserId
+                GivenTo = booking.MentorSchedule.MentorDetail.UserId,
+                GroupName = booking.Leader.Group.GroupName,
+                MentorName = booking.MentorSchedule.MentorDetail.User.FullName,
+                IsMentorFeedback = user.MentorDetail is not null,
             };
 
-            return View(feedbackVM);
+            return View(nameof(SendFeedback), feedbackVM);
+        }
+
+        [HttpGet("send-mentor/{bookingId}")]
+        public IActionResult SendFeedbackMentor(int bookingId)
+        {
+            // Retrieve current user's info
+            var userEmail = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            User user = _unitOfWork.User.Get(u => u.Email == userEmail,
+                        includeProperties: $"{nameof(StudentDetail)},{nameof(MentorDetail)}");
+
+            if (user is null)
+            {
+                return NotFound();
+            }
+            // Retrieve current booking info
+            Booking booking = _unitOfWork.Booking.Get(b => b.Id == bookingId && b.Status == "completed",
+                includeProperties: "MentorSchedule.MentorDetail.User,Leader.User,Leader.Group");
+
+            if (booking is null)
+            {
+                return NotFound();
+            }
+
+            // Check if the user is the mentor for this booking
+            if (booking.MentorSchedule.MentorDetail.UserId != user.Id)
+            {
+                return Forbid();
+            }
+
+            // Check if the user has already given feedback for this booking
+            var existingFeedback = _unitOfWork.Feedback.Get(f => f.BookingId == bookingId && f.GivenBy == user.Id);
+            if (existingFeedback is not null)
+            {
+                TempData["error"] = "You have already submitted feedback for this booking.";
+                return RedirectToAction("ViewMentorBookings", "Booking");
+            }
+
+            // Populate the View model for display
+            var feedbackVM = new FeedbackVM
+            {
+                BookingId = bookingId,
+                GivenBy = user.Id,
+                GivenTo = booking.LeaderId,
+                GroupName = booking.Leader.Group.GroupName,
+                MentorName = booking.MentorSchedule.MentorDetail.User.FullName,
+                IsMentorFeedback = user.MentorDetail is not null,
+
+            };
+
+            return View(nameof(SendFeedback), feedbackVM);
         }
 
         [HttpPost("send")]
@@ -75,22 +128,50 @@ namespace SwpMentorBooking.Web.Controllers
                 Comment = feedbackVM.Comment,
                 Date = DateTime.Now
             };
+            using (var transaction = _unitOfWork.BeginTransaction())
+            {
+                try
+                {
+                    _unitOfWork.Feedback.Add(feedback);
+                    _unitOfWork.Save();
 
-            _unitOfWork.Feedback.Add(feedback);
-            _unitOfWork.Save();
-
+                    transaction.Commit();
+                }
+                catch (Exception ex)
+                {
+                    TempData["error"] = "An error occurred while sending feedback. Please try again.";
+                    return View();
+                }
+            }
             TempData["success"] = "Feedback submitted successfully!";
             return RedirectToAction("ViewBookingDetail", nameof(Booking), new { bookingId = feedbackVM.BookingId });
         }
 
-        //[HttpGet("view")]
-        //public IActionResult ViewFeedbacks()
-        //{
-        //    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        //    var feedbacks = _unitOfWork.Feedback.GetAll(f => f.GivenTo == userId || f.GivenBy == userId,
-        //        includeProperties: "Booking.MentorSchedule.MentorDetail.User,Booking.Leader.User");
+        [HttpGet("view")]
+        public IActionResult ViewFeedbacks()
+        {
+            var userEmail = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            User user = _unitOfWork.User.Get(u => u.Email == userEmail,
+                        includeProperties: $"{nameof(StudentDetail)},{nameof(MentorDetail)}");
 
-        //    return View(feedbacks);
-        //}
+            var feedbacks = _unitOfWork.Feedback.GetAll(f => f.GivenTo == user.Id || f.GivenBy == user.Id,
+                includeProperties: "Booking.MentorSchedule.MentorDetail.User," +
+                                   "Booking.Leader.User,Booking," +
+                                   "GivenByNavigation," +
+                                   "GivenToNavigation");
+
+            var feedbackDetailList = feedbacks.Select(f => new FeedbackDetailVM
+            {
+                BookingId = f.BookingId,
+                SenderName = f.GivenByNavigation.FullName,
+                ReceiverName = f.GivenToNavigation.FullName,
+                Rating = f.Rating,
+                Comment = f.Comment,
+                Date = f.Date,
+                IsGivenByCurrentUser = f.GivenBy == user.Id
+            }).ToList();
+
+            return View(feedbackDetailList);
+        }
     }
 }
