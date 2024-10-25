@@ -1,6 +1,6 @@
 ﻿@model ImportUserPreviewVM<CSVStudentDTO>
 
-<div class="card bg-purple text-white mb-4">
+<div class="card bg-purple text-dark mb-4">
     <div class="card-body">
         <h1 class="text-center mb-0">Student List Preview</h1>
     </div>
@@ -65,11 +65,10 @@
         <form asp-controller="Admin" asp-action="ImportConfirm" method="post">
             <input type="hidden" name="DTOJson" value='@Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.Results.Where(r => !r.Errors.Any()).Select(r => r.Record)))' />
             <input type="hidden" name="SelectedUserType" value="Student" />
-            <button type="submit" class="bg-success">Confirm Import</button>
+            <button type="submit" class="btn btn-success">Confirm Import</button>
         </form>
+        <a asp-controller="Admin" asp-action="Import" class="btn btn-secondary">Cancel</a>
     </div>
-    <div class="col-6 col-md-3">
-        <a asp-controller="Admin" asp-action="Import" class="btn btn-secondary w-100">Cancel</a>
-    </div>
+
 </div>
 

@@ -1,0 +1,50 @@
+﻿@model List<UserFirstLoginVM>
+
+<div class="card bg-purple text-white mb-4">
+    <div class="card-body">
+        <h1 class="text-center mb-0">Send Account Information Email</h1>
+    </div>
+</div>
+
+<div class="card-body border p-4">
+    <h2 class="text-dark">Users to receive account information email:</h2>
+    
+    @if (Model.Any())
+    {
+        <form asp-action="SendEmailAccountInfo" method="post">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Select</th>
+                        <th>Email</th>
+                        <th>Full Name</th>
+                        <th>Role</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (int i = 0; i < Model.Count; i++)
+                    {
+                        <tr>
+                            <td>
+                                <input type="checkbox" name="selectedUsers" value="@Model[i].UserId" checked />
+                            </td>
+                            <td>@Model[i].Email</td>
+                            <td>@Model[i].FullName</td>
+                            <td>@Model[i].Role</td>
+                        </tr>
+                        <input type="hidden" name="userFirstLoginVMs[@i].UserId" value="@Model[i].UserId" />
+                        <input type="hidden" name="userFirstLoginVMs[@i].Email" value="@Model[i].Email" />
+                        <input type="hidden" name="userFirstLoginVMs[@i].FullName" value="@Model[i].FullName" />
+                        <input type="hidden" name="userFirstLoginVMs[@i].Role" value="@Model[i].Role" />
+                    }
+                </tbody>
+            </table>
+
+            <button type="submit" class="btn btn-primary">Send Account Information Emails</button>
+        </form>
+    }
+    else
+    {
+        <p class="text-info">No users found who haven't logged in yet.</p>
+    }
+</div>

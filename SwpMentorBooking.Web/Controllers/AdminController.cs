@@ -363,6 +363,73 @@ namespace SwpMentorBooking.Web.Controllers
             return View();
         }
 
+        [HttpGet("email-account-info")]
+        public IActionResult SendEmailAccountInfo()
+        {
+            // Retrieve the list of users that haven't logged in yet
+            IEnumerable<User> userFirstLoginList = _unitOfWork.User.GetAll(u => u.IsFirstLogin && u.IsActive);
+
+            List<UserFirstLoginVM> userFirstLoginVMs = userFirstLoginList.Select(u => new UserFirstLoginVM
+            {
+                UserId = u.Id,
+                Email = u.Email,
+                FullName = u.FullName,
+                Role = u.Role,
+            }).ToList();
+
+            return View(userFirstLoginVMs);
+        }
+
+        [HttpPost("email-account-info")]
+        public async Task<IActionResult> SendEmailAccountInfo(List<UserFirstLoginVM> userFirstLoginVMs, List<int> selectedUsers)
+        {
+            if (!ModelState.IsValid)
+            {
+                TempData["error"] = "An error has occurred. Please try again.";
+                return RedirectToAction(nameof(ManageUser));
+            }
+
+            List<User> usersToEmail = new List<User>();
+
+            foreach (var userVM in userFirstLoginVMs)
+            {
+                if (selectedUsers.Contains(userVM.UserId))
+                {
+                    var user = _unitOfWork.User.Get(u => u.Id == userVM.UserId);
+                    if (user != null && user.IsFirstLogin && user.IsActive)
+                    {
+                        usersToEmail.Add(user);
+                    }
+                }
+            }
+
+            if (usersToEmail.Count == 0)
+            {
+                TempData["error"] = "No eligible users selected to send emails.";
+                return RedirectToAction(nameof(ManageUser));
+            }
+
+            string subject = "Your Account Information for First-Time Login";
+
+            foreach (var user in usersToEmail)
+            {
+                string body = $"<h1>Dear {user.FullName},</h1>" +
+                    $"<h3>Welcome to SWP Mentor Booking System!</h3>" +
+                    $"<p>We are excited to have you on board. Below are your account details for your first-time login:</p>" +
+                    $"<br />" +
+                    $"<p><strong>Email:</strong> {user.Email}</p>" +
+                    $"<p><strong>Password:</strong> {user.Password}</p>" +
+                    $"<br/>" +
+                    $"<p>Thank you for joining us!</p>" +
+                    $"<p>Best regards,<br/>" +
+                    $"SWP Mentor Booking System</p>";
+
+                await _utilService.Email.SendEmail(user.Email, subject, body);
+            }
+
+            TempData["success"] = $"Account information emails sent to {usersToEmail.Count} users.";
+            return RedirectToAction(nameof(ManageUser));
+        }
         // ** Instant utilities ** //
         private List<string> ImportUsers<T>(List<T> dtos, string userType)
         {
@@ -446,6 +513,11 @@ namespace SwpMentorBooking.Web.Controllers
             }
 
             return existingUser;
+        }
+
+        private async Task SendEmailToImportedUser()
+        {
+
         }
     }
 }
