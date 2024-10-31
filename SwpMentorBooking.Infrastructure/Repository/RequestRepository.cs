@@ -12,5 +12,11 @@ namespace SwpMentorBooking.Infrastructure.Repository
         {
             _context = context;
         }
+
+        public Request Update(Request entity) 
+        {
+            _context.Update(entity);
+            return entity;
+        }
     }
 }

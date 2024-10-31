@@ -27,7 +27,7 @@ namespace SwpMentorBooking.Web.Controllers
         {
             // Retrieve all requests
             List<Request> requests = _unitOfWork.Request.GetAll(
-                                includeProperties: $"Leader.User,Leader.Group.Wallet")
+                                includeProperties: $"Leader.User,Leader.Group.Wallet,Responses")
                                     .ToList();
             return View(requests);
         }
@@ -73,17 +73,18 @@ namespace SwpMentorBooking.Web.Controllers
 
             // Get the list of requests
             List<Request> requestList = _unitOfWork.Request.GetAll(r => r.Leader == studentLeader,
-                                                                includeProperties: $"Leader")
+                                                                includeProperties: "Leader,Responses")
                                                            .ToList();
 
             return View(requestList);
         }
 
-        [Authorize(Roles = "Student")]
+        [Authorize(Roles = "Student, Admin")]
         [HttpGet("details/{id}")]
         public IActionResult ViewDetails(int id)
         {
-            Request request = _unitOfWork.Request.Get(r => r.Id == id);
+            Request request = _unitOfWork.Request.Get(r => r.Id == id,
+                               includeProperties: "Responses");
 
             if (request is null)
             {

@@ -46,6 +46,9 @@ builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("GroupLeaderOnly", policy =>
     policy.Requirements.Add(new GroupLeaderRequirement()));
+
+    options.AddPolicy("StudentInGroupOnly", policy =>
+    policy.Requirements.Add(new StudentInGroupRequirement()));
 });
 // Configure Kestrel
 builder.WebHost.ConfigureKestrel(serverOptions =>

@@ -9,5 +9,6 @@ namespace SwpMentorBooking.Application.Common.Interfaces
 {
     public interface IRequestRepository : IRepository<Request>
     {
+        Request Update(Request entity);
     }
 }
