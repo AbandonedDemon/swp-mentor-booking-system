@@ -6,10 +6,20 @@
     <div class="card-body">
         <h5 class="card-title">Booking #@Model.Id</h5>
 
-        <p><strong>Title</strong> @Model.Title</p>
-        <p><strong>Content</strong> @Model.Content</p>
-        <p><strong>Status</strong> @Model.Status</p>
-        <p><strong>Timestamp:</strong> @Model.Timestamp.ToString("g")</p>
+        <p><strong>Title:</strong> @Model.Title</p>
+        <p><strong>Content:</strong> @Model.Content</p>
+        <p><strong>Status:</strong> @Model.Status</p>
+        <p><strong>Time sent:</strong> @Model.Timestamp.ToString("g")</p>
+        <p><strong>Time processed:</strong> 
+            @if (Model.Responses != null && Model.Responses.Any())
+            {
+                <span>@Model.Responses.First().Timestamp.ToString("g")</span>
+            }
+            else
+            {
+                <span>-</span>
+            }
+        </p>
     </div>
 </div>
 

@@ -5,8 +5,10 @@
     <thead>
         <tr>
             <th>Title</th>
+            <th>Sent</th>
+            <th>Processed</th>
+            <th>Response</th>
             <th>Status</th>
-            <th>Timestamp</th>
             <th>Actions</th>
         </tr>
     </thead>
@@ -15,10 +17,34 @@
         {
             <tr>
                 <td>@request.Title</td>
-                <td>@request.Status</td>
-                <td>@request.Timestamp.ToString("g")</td> <!-- Format date properly -->
+                <td>@request.Timestamp.ToString("g")</td>
                 <td>
-                    <a href="@Url.Action("ViewDetails", new { id = request.Id })" class="btn btn-info">View Details</a>
+                    @{
+                        if (request.Responses != null && request.Responses.Any())
+                        {
+                            <span>@request.Responses.First().Timestamp.ToString("g")</span>
+                        }
+                        else
+                        {
+                            <span>-</span>
+                        }
+                    }
+                </td>
+                <td>
+                    @{
+                        if (request.Responses != null && request.Responses.Any())
+                        {
+                            <span>@request.Responses.First().Content</span>
+                        }
+                        else
+                        {
+                            <span>-</span>
+                        }
+                    }
+                </td>
+                <td>@request.Status</td>
+                <td>
+                    <a href="@Url.Action("ViewDetails", new { id = request.Id })" class="btn btn-info btn-sm">View Details</a>
                 </td>
             </tr>
         }

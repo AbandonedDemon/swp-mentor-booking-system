@@ -60,10 +60,15 @@
                             Confirm Booking
                         </button>
                     }
-                    @if (booking.IsPastBooking)
+                    @if (booking.IsFeedbackable)
+                    {
+                        <a asp-controller="Feedback" asp-action="SendFeedbackMentor" asp-route-bookingId="@booking.BookingId"
+                           class="btn btn-warning btn-sm">Send Feedback</a>
+                    }
+                    @* @if (booking.IsPastBooking)
                     {
                         <button type="button" class="btn btn-secondary" disabled>Past</button>
-                    }
+                    } *@
                 </td>
             </tr>
         }
