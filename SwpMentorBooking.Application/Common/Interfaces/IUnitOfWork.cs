@@ -24,6 +24,7 @@ namespace SwpMentorBooking.Application.Common.Interfaces
         IFeedbackRepository Feedback { get; }
         IRequestRepository Request {  get; }
         IResponseRepository Response {  get; }
+        IWalletTransactionRepository WalletTransaction { get; }
         IDbContextTransaction BeginTransaction();
         void Save();
 

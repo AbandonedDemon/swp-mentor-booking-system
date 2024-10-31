@@ -28,6 +28,7 @@ namespace SwpMentorBooking.Infrastructure.Repository
         public IFeedbackRepository Feedback { get; private set; }
         public IRequestRepository Request {  get; private set; }
         public IResponseRepository Response {  get; private set; }
+        public IWalletTransactionRepository WalletTransaction { get; private set; }
         public UnitOfWork(ApplicationDbContext context)
         {
             _context = context;
@@ -46,6 +47,7 @@ namespace SwpMentorBooking.Infrastructure.Repository
             Feedback = new FeedbackRepository(_context);
             Request = new RequestRepository(_context);
             Response = new ResponseRepository(_context);
+            WalletTransaction = new WalletTransactionRepository(_context);
         }
 
 

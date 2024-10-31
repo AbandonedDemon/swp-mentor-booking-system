@@ -86,7 +86,11 @@ else
                         {
                             <h2 class="card-title">Group Name: @Model.StudentGroup.GroupName</h2>
                             <h5 class="card-subtitle mb-2 text-muted">Topic: @Model.StudentGroup.Topic?.Name</h5>
-                            <p class="card-text"><strong>Wallet Points:</strong>  @Model.StudentGroup.Wallet.Balance</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                            <p class="card-text"><strong>Wallet Points:</strong> @Model.StudentGroup.Wallet.Balance</p>
+                                <div>
+                                    <a href="@Url.Action("ViewTransactions", "Wallet")" class="btn btn-primary"><i class="fas fa-history"></i> Transactions</a></div>
+                            </div>
                             <h5 class="mt-4">Members:</h5>
                             <ul class="member-list">
                                 @foreach (var student in Model.GroupMembers)

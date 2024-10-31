@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SwpMentorBooking.Application.Common.Interfaces;
+using SwpMentorBooking.Application.Common.Utilities;
 using SwpMentorBooking.Domain.Entities;
 using SwpMentorBooking.Web.ViewModels;
 using SwpMentorBooking.Web.Helpers;
@@ -38,7 +39,7 @@ namespace SwpMentorBooking.Web.Controllers
             IEnumerable<Slot> slots = _unitOfWork.Slot.GetAll();
             // Get the selected mentor's schedules
             IEnumerable<MentorSchedule> mentorSchedules = _unitOfWork.MentorSchedule
-                .GetAll(ms => ms.MentorDetailId == mentor.UserId && ms.Status != "unavailable", includeProperties: nameof(Slot))
+                .GetAll(ms => ms.MentorDetailId == mentor.UserId && ms.Status != Constants.MentorScheduleStatus.Unavailable, includeProperties: nameof(Slot))
                 .OrderBy(ms => ms.Date);
 
             var mentorScheduleVM = mentorSchedules.Select(s => new MentorScheduleVM
@@ -88,7 +89,7 @@ namespace SwpMentorBooking.Web.Controllers
         {
             var mentorSchedule = _unitOfWork.MentorSchedule.Get(ms => ms.Id == scheduleId,
                 includeProperties: $"{nameof(Slot)},MentorDetail.User");
-            if (mentorSchedule is null || mentorSchedule.Status != "available")
+            if (mentorSchedule is null || mentorSchedule.Status != Constants.MentorScheduleStatus.Available)
             {
                 return NotFound();
             }
@@ -127,7 +128,7 @@ namespace SwpMentorBooking.Web.Controllers
             // Get the schedule
             var mentorSchedule = _unitOfWork.MentorSchedule.Get(ms => ms.Id == bookingDetailsVM.MentorScheduleId,
                 includeProperties: $"{nameof(Slot)},MentorDetail.User");
-            if (mentorSchedule is null || mentorSchedule.Status != "available")
+            if (mentorSchedule is null || mentorSchedule.Status != Constants.MentorScheduleStatus.Available)
             {
                 return NotFound();
             }
@@ -216,7 +217,7 @@ namespace SwpMentorBooking.Web.Controllers
                 MentorScheduleId = bookingDetailsVM.MentorScheduleId,
                 Timestamp = DateTime.Now,
                 Note = bookingDetailsVM.Note,
-                Status = "pending"
+                Status = Constants.BookingStatus.Pending,
             };
             // Initiate transaction
             using (var transaction = _unitOfWork.BeginTransaction())
@@ -229,8 +230,19 @@ namespace SwpMentorBooking.Web.Controllers
                     wallet.Balance = (wallet.Balance - _bookingCost);
                     _unitOfWork.Wallet.Update(wallet);
 
+                    // Add to transaction history
+                    WalletTransaction walletTransaction = new WalletTransaction
+                    {
+                        Date = DateTime.Now,
+                        Amount = _bookingCost,
+                        Type = Constants.WalletDefaults.TransactionTypeDeduction,
+                        Description = Constants.TransactionDescriptions.BookingPayment,
+                        WalletId = wallet.Id,
+                    };
+                    _unitOfWork.WalletTransaction.Add(walletTransaction);
+
                     // Update the mentor schedule status
-                    mentorSchedule.Status = "booked";
+                    mentorSchedule.Status = Constants.MentorScheduleStatus.Booked;
                     _unitOfWork.MentorSchedule.Update(mentorSchedule);
                     // Save changes
                     _unitOfWork.Save();
@@ -482,7 +494,7 @@ namespace SwpMentorBooking.Web.Controllers
         {
             // Get user info
             var userEmail = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var user = _unitOfWork.User.Get(u => u.Email == userEmail, 
+            var user = _unitOfWork.User.Get(u => u.Email == userEmail,
                 includeProperties: $"{nameof(StudentDetail)},{nameof(MentorDetail)}");
 
             // Retrieve the booking with all necessary related entities
@@ -547,7 +559,7 @@ namespace SwpMentorBooking.Web.Controllers
             {
                 try
                 {
-                    booking.Status = "confirmed";
+                    booking.Status = Constants.BookingStatus.Confirmed;
                     _unitOfWork.Booking.Update(booking);
 
                     _unitOfWork.Save();
@@ -568,25 +580,42 @@ namespace SwpMentorBooking.Web.Controllers
         [HttpPost("complete")]
         public IActionResult CompleteBooking(int bookingId)
         {
-            var booking = _unitOfWork.Booking.Get(b => b.Id == bookingId);
+            var booking = _unitOfWork.Booking.Get(b => b.Id == bookingId,
+                          includeProperties: "MentorSchedule.MentorDetail");
             if (booking == null)
             {
                 return NotFound();
             }
-
-            if (booking.Status != "confirmed")
+            if (booking.Status != Constants.BookingStatus.Confirmed)
             {
                 TempData["error"] = "Only confirmed bookings can be marked as completed.";
                 return RedirectToAction(nameof(ViewStudentBookings));
             }
+            // Get mentor's info
+            MentorDetail mentor = _unitOfWork.Mentor.Get(m =>
+                                  m.UserId == booking.MentorSchedule.MentorDetailId);
+
+            if (mentor is null)
+            {
+                TempData["error"] = "An error has occurred. Please try again";
+                return RedirectToAction(nameof(ViewStudentBookings));
+            }
+            // Proceed to update booking status & add points to Mentor's booking score
             using (var transaction = _unitOfWork.BeginTransaction())
             {
-                try { 
-                booking.Status = "completed";
-                _unitOfWork.Booking.Update(booking);
-                _unitOfWork.Save();
-                transaction.Commit();
-                } catch (Exception ex)
+                try
+                {
+                    // Update status
+                    booking.Status = Constants.BookingStatus.Completed;
+                    _unitOfWork.Booking.Update(booking);
+
+                    // Update score
+                    mentor.BookingScore += _bookingCost;
+                    _unitOfWork.Mentor.Update(mentor);
+                    _unitOfWork.Save();
+                    transaction.Commit();
+                }
+                catch (Exception ex)
                 {
                     transaction.Rollback();
                     TempData["error"] = "An error has occurred completing the meeting. Please try again.";
@@ -598,5 +627,7 @@ namespace SwpMentorBooking.Web.Controllers
             TempData["success"] = "Booking marked as completed successfully.";
             return RedirectToAction(nameof(ViewStudentBookings));
         }
+
+
     }
 }

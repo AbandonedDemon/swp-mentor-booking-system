@@ -9,5 +9,6 @@ namespace SwpMentorBooking.Application.Common.Interfaces
 {
     public interface IMentorRepository : IRepository<MentorDetail>
     {
+        MentorDetail Update(MentorDetail entity);
     }
 }
