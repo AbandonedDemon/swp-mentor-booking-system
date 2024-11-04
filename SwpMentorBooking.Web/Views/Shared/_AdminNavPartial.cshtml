@@ -1,9 +1,9 @@
-<li class="nav-item">
+@* <li class="nav-item">
     <a class="nav-link @(ViewContext.RouteData.Values["Action"].ToString() == "Index" ? "active" : "")" asp-action="Index" asp-controller="Admin">
         <i class="fas fa-home"></i>
         <span>Homepage</span>
     </a>
-</li>
+</li> *@
 <li class="nav-item">
     <a class="nav-link  @(ViewContext.RouteData.Values["Action"].ToString() == "ManageUser" ? "active" : "")" asp-action="ManageUser" asp-controller="Admin">
         <i class="fas fa-users"></i>
@@ -11,10 +11,22 @@
     </a>
 </li>
 <li class="nav-item">
+    <a class="nav-link @(ViewContext.RouteData.Values["Action"].ToString() == "ManageBookings" ? "active" : "")" asp-controller="Booking" asp-action="ManageBookings">
+        <i class="fas fa-calendar-alt"></i>
+        <span>Bookings</span>
+    </a>
+</li>
+<li class="nav-item">
     <a class="nav-link @(ViewContext.RouteData.Values["Action"].ToString() == "ManageTopic" ? "active" : "")" asp-controller="Topic" asp-action="ManageTopic">
         <i class="fa-solid fa-rectangle-list"></i>
         Topics
-        </a>
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link @(ViewContext.RouteData.Values["Action"].ToString() == "ManageGroup" ? "active" : "")" asp-controller="StudentGroup" asp-action="ManageGroup">
+        <i class="fa-solid fa-users"></i>
+        Groups
+    </a>
 </li>
 <li class="nav-item">
     <a class="nav-link @(ViewContext.RouteData.Values["Action"].ToString() == "ManageRequests" ? "active" : "")" asp-controller="Request" asp-action="ManageRequests">

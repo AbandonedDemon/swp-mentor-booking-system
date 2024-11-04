@@ -1,12 +1,11 @@
 ﻿@model MentorProfileVM
 
-<a asp-controller="Student" asp-action="ViewMentors" class="btn btn-info mt-2">Back</a>
-<div class="card bg-purple text-white mb-4">
+<div class="card bg-dark text-white mb-4">
     <div class="card-body">
         <h1 class="text-center mb-0">Mentor Profile</h1>
     </div>
 </div>
-
+<a asp-controller="Student" asp-action="ViewMentors" class="btn bg-dark text-white mt-2">Back</a>
 <div class="container mt-4">
     <div class="row">
         <div class="col-md-4">
@@ -14,15 +13,17 @@
                 <div class="card-body text-center">
                     @* <img src="@(string.IsNullOrEmpty(Model.ProfilePhoto) ? "/images/default-profile.png" : Model.ProfilePhotoUrl)"
                     class="rounded-circle img-fluid" style="width: 150px;" alt="Mentor Profile Photo"> *@
+                    @* <img src="~/image/mentor-placeholder.jpg" alt="ProfilePhoto" class="rounded-circle img-fluid mb-3" style="width: 150px; height: 150px"> *@
+                    <img src="~/image/mentor-placeholder.jpg" class="card-img-top" alt="@Model.FullName">
                     <h3 class="my-3">@Model.FullName</h3>
                     <p class="text-muted mb-1">Mentor</p>
                     <p class="text-muted mb-4">Booking Score: @Model.BookingScore</p>
 
                     @if (Model.IsStudentGroupLeader)
                     {
-                        <a asp-controller="Booking" asp-action="BookSchedule" asp-route-mentorId="@Model.UserId" class="btn btn-primary">Book a Schedule</a>
+                        <a asp-controller="Booking" asp-action="BookSchedule" asp-route-mentorId="@Model.UserId" class="btn btn-outline-dark"><strong>Book a Schedule</strong></a>
                     }
-                    <a asp-controller="Student" asp-action="ViewMentorSchedule" asp-route-mentorId="@Model.UserId" class="btn btn-primary">View Schedule</a>
+                    <a asp-controller="Student" asp-action="ViewMentorSchedule" asp-route-mentorId="@Model.UserId" class="btn btn-outline-dark"><strong>View Schedule</strong></a>
                 </div>
             </div>
         </div>
@@ -30,7 +31,15 @@
             <div class="card mb-4">
                 <div class="card-body">
                     <h5 class="card-title">About Me</h5>
-                    <p class="card-text">@Model.Description</p>
+                    @if (!string.IsNullOrEmpty(Model.Description))
+                    {
+                        <p class="card-text">@Model.Description</p>
+                    }
+                    else
+                    {
+                        <p class="card-text text-secondary">No description provided.</p>
+                    }
+
                 </div>
             </div>
             <div class="card mb-4">
@@ -40,26 +49,26 @@
                     <div>
                         <h6>Programming Languages</h6>
                         <p>Main:</p>
-                        <ul>
+                        <ul style="list-style: none">
                             @foreach (var lang in Model.MainProgrammingLanguage)
                             {
-                                <li>@lang</li>
+                                <li><span class="badge bg-dark">@lang</span></li>
                             }
                         </ul>
                         <p>Additional:</p>
-                        <ul>
+                        <ul style="list-style: none">
                             @foreach (var lang in Model.AltProgrammingLanguage)
                             {
-                                <li>@lang</li>
+                                <li><span class="badge bg-dark">@lang</span></li>
                             }
                         </ul>
                     </div>
                     <div>
                         <h6>Frameworks:</h6>
-                        <ul>
+                        <ul style="list-style: none">
                             @foreach (var framework in Model.Framework)
                             {
-                                <li>@framework</li>
+                                <li><span class="badge bg-dark">@framework</span></li>
                             }
                         </ul>
                     </div>
@@ -71,7 +80,7 @@
                     <ul>
                         @foreach (var edu in Model.Education)
                         {
-                            <li>@edu</li>
+                            <li><span class="badge bg-dark">@edu</span></li>
                         }
                     </ul>
                 </div>

@@ -5,9 +5,9 @@ namespace SwpMentorBooking.Application.Common.Utilities
 
         public static class UserRoles
         {
-            public const string Admin = "admin";
-            public const string Mentor = "mentor";
-            public const string Student = "student";
+            public const string Admin = "Admin";
+            public const string Mentor = "Mentor";
+            public const string Student = "Student";
         }
         
         public static class WalletDefaults
@@ -38,6 +38,14 @@ namespace SwpMentorBooking.Application.Common.Utilities
             public const string Available = "available";
             public const string Booked = "booked";
             public const string Unavailable = "unavailable";
+        }
+
+        public static class RequestStatus
+        {
+            public const string Pending = "pending";
+            public const string Processing = "processing";
+            public const string Approved = "approved";
+            public const string Rejected = "rejected";
         }
     }
 } 

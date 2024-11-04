@@ -6,7 +6,7 @@
 }
 @model ManageUserVM
 
-<div class="card bg-purple text-white mb-4">
+@* <div class="card bg-purple text-white mb-4">
     <div class="card-body">
         <h1 class="text-center mb-0">User Management</h1>
     </div>
@@ -17,17 +17,15 @@
         <i class="bi bi-plus-circle"></i><i class="fas fa-plus"></i> Import User from list
     </a>
 
+    <a asp-controller="Admin" asp-action="CreateUser" class="btn btn-success">
+        <i class="bi bi-plus-circle"></i><i class="fas fa-plus"></i> Create User manually
+    </a>
+
     <a asp-controller="Admin" asp-action="SendEmailAccountInfo" class="btn btn-success">
         Send account information Email
     </a>
 </div>
 
-@* <div class="w-75 btn-group" role="group">
-    <a asp-controller="Admin" asp-action="SendEmail"
-       class="btn btn-success mx-3">
-        <i class="bi bi-pencil-square"></i>Send the email
-    </a>
-</div> *@
 <input type="text" id="searchInput" onkeyup="filterUser()" placeholder="Search for names...">
 <ul class="nav nav-tabs" id="userTabs" role="tablist">
     <li class="nav-item" role="presentation">
@@ -166,4 +164,201 @@
 </style>
 
 <script src="~/js/manageUser.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> *@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .content-box {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .bg-purple {
+            background-color: #6f42c1;
+        }
+
+        .text-purple {
+            color: #6f42c1;
+        }
+
+        .btn-purple {
+            background-color: #6f42c1;
+            color: white;
+        }
+
+            .btn-purple:hover {
+                background-color: #5a32a3;
+                color: white;
+            }
+    </style>
+</head>
+<body>
+    <!-- Main content with sidebar -->
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Main content -->
+            <main class="col-md-12 ms-sm-auto col-lg-12 px-md-4">
+                <div class="content-box">
+                    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                        <h1 class="h2">User Management</h1>
+                        <div class="btn-toolbar mb-2 mb-md-0">
+                            <a asp-controller="Admin" asp-action="Import" class="btn btn-sm btn-outline-secondary me-2">
+                                <i class="fas fa-plus"></i> Import User
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="card mt-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">User List</h5>
+                        </div>
+                        <div class="card-body">
+                            <input type="text" id="searchInput" onkeyup="filterUser()" placeholder="Search for names..." class="form-control mb-3">
+
+                            <ul class="nav nav-tabs" id="userTabs" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link active" id="students-tab" data-bs-toggle="tab"
+                                            data-bs-target="#students" type="button" role="tab" aria-controls="students"
+                                            aria-selected="true">
+                                        Students
+                                    </button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="mentors-tab" data-bs-toggle="tab"
+                                            data-bs-target="#mentors" type="button" role="tab" aria-controls="mentors"
+                                            aria-selected="false">
+                                        Mentors
+                                    </button>
+                                </li>
+                            </ul>
+                            <div class="tab-content" id="userTabContent">
+                                <div class="tab-pane fade show active" id="students" role="tabpanel" aria-labelledby="students-tab">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover table-bordered shadow-sm" id="studentTable">
+                                            <thead class="bg-purple text-white">
+                                                <tr>
+                                                    <th>Email</th>
+                                                    <th>Full Name</th>
+                                                    <th>Phone Number</th>
+                                                    <th>Gender</th>
+                                                    <th>Profile Photo</th>
+                                                    <th>Student Code</th>
+                                                    <th>Status</th>
+                                                    <th class="text-center">Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach (var item in Model.Students)
+                                                {
+                                                    <tr>
+                                                        <td class="align-middle">@item.Email</td>
+                                                        <td class="align-middle">@item.FullName</td>
+                                                        <td class="align-middle">@item.Phone</td>
+                                                        <td class="align-middle">@item.Gender</td>
+                                                        <td class="align-middle"><img src="@item.ProfilePhoto" alt="@item.FullName" /></td>
+                                                        <td class="align-middle">@item.StudentDetail.StudentCode</td>
+                                                        <td class="align-middle">@(item.IsActive ? "Active" : "Deactivated")</td>
+                                                        <td class="text-center">
+                                                            <button class="btn btn-sm btn-primary">
+                                                                <a asp-controller="Admin" asp-action="Update" asp-route-userId="@item.Id" style="text-decoration: none;color: white;">
+                                                                    Edit
+                                                                </a>
+                                                            </button>
+                                                            <button class="btn btn-sm btn-danger">
+                                                                <a asp-controller="Admin" asp-action="Delete" asp-route-userId="@item.Id"
+                                                                   style="text-decoration: none; color: white;">
+                                                                    Delete
+                                                                </a>
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <div class="tab-pane fade" id="mentors" role="tabpanel" aria-labelledby="mentors-tab">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover table-bordered shadow-sm" id="mentorTable">
+                                            <thead class="bg-purple text-white">
+                                                <tr>
+                                                    <th>Email</th>
+                                                    <th>Full Name</th>
+                                                    <th>Phone Number</th>
+                                                    <th>Gender</th>
+                                                    <th>Profile Photo</th>
+                                                    <th>Role</th>
+                                                    <th>Status</th>
+                                                    <th>Skills</th>
+                                                    <th class="text-center">Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach (var item in Model.Mentors)
+                                                {
+                                                    <tr>
+                                                        <td class="align-middle">@item.Email</td>
+                                                        <td class="align-middle">@item.FullName</td>
+                                                        <td class="align-middle">@item.Phone</td>
+                                                        <td class="align-middle">@item.Gender</td>
+                                                        <td class="align-middle"><img src="@item.ProfilePhoto" alt="@item.FullName" /></td>
+                                                        <td class="align-middle">@item.Role</td>
+                                                        <td class="align-middle">@(item.IsActive ? "Active" : "Deactivated")</td>
+                                                        <td class="align-middle">
+                                                            @if (item.MentorDetail.Skills.Any())
+                                                            {
+                                                                <ul>
+                                                                    @foreach (var skill in item.MentorDetail.Skills)
+                                                                    {
+                                                                        <li>@skill</li>
+                                                                    }
+                                                                </ul>
+                                                            }
+                                                            else
+                                                            {
+                                                                <span>Not specified</span>
+                                                            }
+                                                        </td>
+                                                        <td class="text-center">
+                                                            <button class="btn btn-sm btn-primary">
+                                                                <a asp-controller="Admin" asp-action="Update" asp-route-userId="@item.Id" style="text-decoration: none;color: white;">
+                                                                    Edit
+                                                                </a>
+                                                            </button>
+                                                            <button class="btn btn-sm btn-danger">
+                                                                <a asp-controller="Admin" asp-action="Delete" asp-route-userId="@item.Id"
+                                                                   style="text-decoration: none; color: white;">
+                                                                    Delete
+                                                                </a>
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/manageUser.js"></script>
+</body>
+
+</html>

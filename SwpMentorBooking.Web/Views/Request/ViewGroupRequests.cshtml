@@ -1,24 +1,27 @@
-﻿@model List<Request>
+﻿@model ViewGroupRequestsVM
 
-<a href="@Url.Action("ViewGroupRequests", "Request")" class="btn btn-secondary mb-2">Back to Requests</a>
+<a href="@Url.Action("MyGroup", "Student")" class="btn btn-secondary mb-2">Back to Group</a>
 <h2>My Group Requests</h2>
 <table class="table">
     <thead>
         <tr>
             <th>Title</th>
             <th>Sent</th>
+            <th>Content</th>
             <th>Processed</th>
             <th>Response</th>
             <th>Status</th>
-            <th>Actions</th>
         </tr>
     </thead>
     <tbody>
-        @foreach (var request in Model)
+        @foreach (var request in Model.Requests)
         {
             <tr>
                 <td>@request.Title</td>
                 <td>@request.Timestamp.ToString("g")</td>
+                <td>
+                    @request.Content
+                </td>
                 <td>
                     @{
                         if (request.Responses != null && request.Responses.Any())
@@ -43,14 +46,25 @@
                         }
                     }
                 </td>
-                <td>@request.Status</td>
                 <td>
-                    <a href="@Url.Action("ViewDetails", new { id = request.Id })" class="btn btn-info btn-sm">View Details</a>
+                    <span class="badge @(request.Status switch {
+                            var s when s == Constants.RequestStatus.Pending => "bg-secondary",
+                            var s when s == Constants.RequestStatus.Processing => "bg-warning",
+                            var s when s == Constants.RequestStatus.Approved => "bg-success",
+                            var s when s == Constants.RequestStatus.Rejected => "bg-danger",
+                            _ => "bg-primary"
+                    })">
+                        @StringHelper.CapitalizeFirstLetter(request.Status)
+                    </span>
                 </td>
+
             </tr>
         }
     </tbody>
 </table>
-<a href="@Url.Action("SendRequest", "Request")" class="btn btn-primary">Submit a New Request</a>
 
+@if (Model.IsLeader)
+{
+    <a href="@Url.Action("SendRequest", "Request")" class="btn btn-primary">Submit a New Request</a>
+}
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

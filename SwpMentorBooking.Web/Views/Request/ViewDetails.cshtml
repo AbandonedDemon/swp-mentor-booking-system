@@ -1,7 +1,28 @@
-﻿@model Request
+﻿@using System.Security.Claims;
+
+@{
+    var userRole = User.FindFirst(ClaimTypes.Role)?.Value;
+}
+
+@model Request
 
 <h2>Request Details</h2>
-<a href="@Url.Action("ViewGroupRequests", "Request")" class="btn btn-secondary">Back to Requests</a>
+
+@if (userRole.Equals(Constants.UserRoles.Admin))
+{
+    <a asp-action="ManageRequests" asp-controller="Request" class="btn btn-secondary">
+        Back to Requests
+    </a>
+}
+else
+{
+    <a asp-action="ViewGroupRequests" asp-controller="Request" class="btn btn-secondary">
+        Back to Requests
+    </a>
+
+}
+
+
 <div class="card">
     <div class="card-body">
         <h5 class="card-title">Booking #@Model.Id</h5>
@@ -10,7 +31,8 @@
         <p><strong>Content:</strong> @Model.Content</p>
         <p><strong>Status:</strong> @Model.Status</p>
         <p><strong>Time sent:</strong> @Model.Timestamp.ToString("g")</p>
-        <p><strong>Time processed:</strong> 
+        <p>
+            <strong>Time processed:</strong>
             @if (Model.Responses != null && Model.Responses.Any())
             {
                 <span>@Model.Responses.First().Timestamp.ToString("g")</span>

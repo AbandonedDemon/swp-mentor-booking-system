@@ -15,11 +15,13 @@ html {
 html {
     position: relative;
     min-height: 100%;
+    overflow-y: auto !important;
 }
 
 body {
     background-color: #e6f3ff !important;
     margin-bottom: 60px;
+    overflow-y: auto !important;
 }
 
 header {

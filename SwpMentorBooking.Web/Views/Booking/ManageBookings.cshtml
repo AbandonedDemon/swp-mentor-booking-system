@@ -1,0 +1,130 @@
+@{
+    Layout = "_Layout";
+}
+
+@model ManageBookingsVM
+
+<h2>Manage Bookings</h2>
+
+<form asp-action="ManageBookings" method="get" class="mb-4">
+    <div class="row">
+        <div class="col-md-3">
+            <label for="status">Status:</label>
+            <select name="status" id="status" class="form-control">
+                <option value="">All</option>
+                <option value="@Constants.BookingStatus.Pending" selected="@(Model.Status == Constants.BookingStatus.Pending)">Pending</option>
+                <option value="@Constants.BookingStatus.Confirmed" selected="@(Model.Status == Constants.BookingStatus.Confirmed)">Confirmed</option>
+                <option value="@Constants.BookingStatus.Cancelled" selected="@(Model.Status == Constants.BookingStatus.Cancelled)">Cancelled</option>
+                <option value="@Constants.BookingStatus.Completed" selected="@(Model.Status == Constants.BookingStatus.Completed)">Completed</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label for="groupId">Group:</label>
+            <select name="groupId" id="groupId" class="form-control">
+                <option value="">All Groups</option>
+                @foreach (var group in Model.Groups)
+                {
+                    <option value="@group.Value" selected="@(Model.SelectedGroupId.ToString() == group.Value)">
+                        @group.Text
+                    </option>
+                }
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label for="mentorId">Mentor:</label>
+            <select name="mentorId" id="mentorId" class="form-control">
+                <option value="">All Mentors</option>
+                @foreach (var mentor in Model.Mentors)
+                {
+                    <option value="@mentor.Value" selected="@(Model.SelectedMentorId.ToString() == mentor.Value)">
+                        @mentor.Text
+                    </option>
+                }
+            </select>
+        </div>
+    </div>
+    <div class="row mt-3">
+        <div class="col-md-3">
+            <label for="startDate">Start Date:</label>
+            <input type="date" name="startDate" id="startDate" class="form-control" 
+                   value="@Model.StartDate?.ToString("yyyy-MM-dd")">
+        </div>
+        <div class="col-md-3">
+            <label for="endDate">End Date:</label>
+            <input type="date" name="endDate" id="endDate" class="form-control" 
+                   value="@Model.EndDate?.ToString("yyyy-MM-dd")">
+        </div>
+        <div class="col-md-3 d-flex align-items-end">
+            <button type="submit" class="btn btn-primary">Filter</button>
+            <a asp-action="ManageBookings" class="btn btn-secondary ms-2">Clear Filters</a>
+        </div>
+    </div>
+</form>
+
+<div class="table-responsive" style="max-height: 60vh; overflow-y: auto;">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Booking ID</th>
+                <th>Group</th>
+                <th>Mentor</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var booking in Model.Bookings)
+            {
+                <tr>
+                    <td>@booking.BookingId</td>
+                    <td>@booking.GroupName</td>
+                    <td>@booking.MentorName</td>
+                    <td>@booking.ScheduleDate.ToString("dd/MM/yyyy")</td>
+                    <td>@booking.SlotStartTime.ToString("HH:mm") - @booking.SlotEndTime.ToString("HH:mm")</td>
+                    <td>
+                        <span class="badge @(booking.Status switch {
+                            var s when s == Constants.BookingStatus.Pending => "bg-warning",
+                            var s when s == Constants.BookingStatus.Confirmed => "bg-primary",
+                            var s when s == Constants.BookingStatus.Cancelled => "bg-danger",
+                            var s when s == Constants.BookingStatus.Completed => "bg-success",
+                            _ => "bg-secondary"
+                        })">
+                            @StringHelper.CapitalizeFirstLetter(booking.Status)
+                        </span>
+                    </td>
+                    <td>
+                        <a asp-action="ManageBookingDetail" asp-route-bookingId="@booking.BookingId" 
+                           class="btn btn-sm btn-info">
+                            Details
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@if (Model.TotalPages > 1)
+{
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+            @for (int i = 1; i <= Model.TotalPages; i++)
+            {
+                <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                    <a class="page-link" href="@Url.Action("ManageBookings", new { 
+                        page = i, 
+                        status = Model.Status,
+                        groupId = Model.SelectedGroupId,
+                        mentorId = Model.SelectedMentorId,
+                        startDate = Model.StartDate?.ToString("yyyy-MM-dd"),
+                        endDate = Model.EndDate?.ToString("yyyy-MM-dd")
+                    })">@i</a>
+                </li>
+            }
+        </ul>
+    </nav>
+} 
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

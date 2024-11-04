@@ -4,57 +4,7 @@
     ViewData["Title"] = "Manage Topics";
     Layout = "_Layout";
 }
-
-@* <div class="card bg-purple text-white mb-4">
-    <div class="card-body">
-        <h1 class="text-center mb-0">Manage Topics</h1>
-    </div>
-</div>
-
-<div class="row">
-    <div class="col-md-6">
-        <h2>Current Topics</h2>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Description</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var topic in Model.Topics)
-                {
-                    <tr>
-                        <td>@topic.Name</td>
-                        <td>@topic.Description</td>
-                        <td>
-                            <a asp-action="EditTopic" asp-route-id="@topic.Id" class="btn btn-primary btn-sm">Edit</a>
-                            <a asp-action="DeleteTopic" asp-route-id="@topic.Id" class="btn btn-danger btn-sm">Delete</a>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    </div>
-    <div class="col-md-6">
-        <h2>Add new topic</h2>
-        <form asp-action="AddTopic" method="post">
-            <div class="form-group">
-                <label asp-for="NewTopic.Name">Name</label>
-                <input asp-for="NewTopic.Name" class="form-control" />
-                <span asp-validation-for="NewTopic.Name" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="NewTopic.Description">Description</label>
-                <input asp-for="NewTopic.Description" class="form-control" />
-                <span asp-validation-for="NewTopic.Description" class="text-danger"></span>
-            </div>
-            <button type="submit" class="btn btn-primary">Add Topic</button>
-        </form>
-    </div>
-</div> *@
-
+@*
 <div class="card mb-4">
     <div class="card-body">
         <div class="row">
@@ -176,4 +126,165 @@
 
 @section Scripts {
     <script src="~/js/manageTopic.js"></script>
+} *@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Topics</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="~/css/topic.css">
+
+</head>
+
+<body>
+    <!-- Main content with sidebar -->
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Main content -->
+            <main class="col-md-12 ms-sm-auto col-lg-12 px-md-4">
+                <div class="content-box">
+                    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                        <h1 class="h2">Manage Topics</h1>
+                        <div class="btn-toolbar mb-2 mb-md-0">
+                            <button type="button" class=" btn btn-sm btn-outline-secondary me-2" data-bs-toggle="modal"
+                                    data-bs-target="#addTopicModal">
+                                <i class="fas fa-plus"></i> Add New Topic
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="card mt-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">Topic List</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover table-bordered shadow-sm" id="topicTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Topic Name</th>
+                                            <th>Description</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var topic in Model.Topics)
+                                        {
+                                            <tr>
+                                                <td>@topic.Name</td>
+                                                <td>@topic.Description</td>
+                                                <td>
+                                                    <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editTopicModal" data-topic-id="@topic.Id" data-topic-name="@topic.Name" data-topic-description="@topic.Description">
+                                                        Edit
+                                                    </button>
+                                                    <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteTopicModal" data-topic-id="@topic.Id" data-topic-name="@topic.Name">
+                                                        Delete
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Add Topic Modal -->
+    <div class="modal fade" id="addTopicModal" tabindex="-1" aria-labelledby="addTopicModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addTopicModalLabel">Add New Topic</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form asp-action="AddTopic" method="post">
+                        <div class="form-group">
+                            <label asp-for="NewTopic.Name">Name</label>
+                            <input asp-for="NewTopic.Name" class="form-control" />
+                            <span asp-validation-for="NewTopic.Name" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="NewTopic.Description">Description</label>
+                            <input asp-for="NewTopic.Description" class="form-control" />
+                            <span asp-validation-for="NewTopic.Description" class="text-danger"></span>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary">Add Topic</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Topic Modal -->
+    <div class="modal fade" id="editTopicModal" tabindex="-1" aria-labelledby="editTopicModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editTopicModalLabel">Edit Topic</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form asp-action="EditTopic" asp-controller="Topic" method="post">
+                        <input type="hidden" id="editTopicId" name="topicId" />
+                        <div class="form-group">
+                            <label for="editTopicName">Name</label>
+                            <input type="text" class="form-control" id="editTopicName" name="Name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="editTopicDescription">Description</label>
+                            <input type="text" class="form-control" id="editTopicDescription" name="Description" required>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Topic Modal -->
+    <div class="modal fade" id="deleteTopicModal" tabindex="-1" aria-labelledby="deleteTopicModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteTopicModalLabel">Delete Topic</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete the topic: <span id="deleteTopicName"></span>?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <form asp-action="DeleteTopic" asp-controller="Topic" method="post">
+                        <input type="hidden" id="deleteTopicId" name="topicId" />
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
+
+@section Scripts {
+    <script src="~/js/manageTopic.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 }

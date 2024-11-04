@@ -76,7 +76,13 @@ namespace SwpMentorBooking.Web.Controllers
                                                                 includeProperties: "Leader,Responses")
                                                            .ToList();
 
-            return View(requestList);
+            ViewGroupRequestsVM viewGroupRequestsVM = new ViewGroupRequestsVM
+            {
+                Requests = requestList,
+                IsLeader = student.IsLeader
+            };
+
+            return View(viewGroupRequestsVM);
         }
 
         [Authorize(Roles = "Student, Admin")]

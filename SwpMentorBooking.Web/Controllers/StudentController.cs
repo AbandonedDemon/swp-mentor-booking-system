@@ -1,15 +1,17 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SwpMentorBooking.Application.Common.Interfaces;
+using SwpMentorBooking.Application.Common.Utilities;
 using SwpMentorBooking.Domain.Entities;
 using SwpMentorBooking.Infrastructure.Utils;
 using SwpMentorBooking.Web.ViewModels;
+using System.Linq;
 using System.Security.Claims;
 using RouteAttribute = Microsoft.AspNetCore.Mvc.RouteAttribute;
 
 namespace SwpMentorBooking.Web.Controllers
 {
-    [Authorize(Roles = "Student")]
+    [Authorize]
     [Route("student")]
     public class StudentController : Controller
     {
@@ -24,7 +26,13 @@ namespace SwpMentorBooking.Web.Controllers
         [HttpGet("home")]
         public IActionResult Index()
         {
-            return View();
+            var mentorList = _unitOfWork.User.GetAll(filter: u => u.MentorDetail.UserId == u.Id,
+                                                    includeProperties: nameof(MentorDetail)).OrderByDescending(u => u.MentorDetail.BookingScore);
+            ManageUserVM manageUserVM = new ManageUserVM
+            {
+                Mentors = mentorList,
+            };
+            return View(manageUserVM);
         }
 
         [HttpGet("profile")]
@@ -216,5 +224,6 @@ namespace SwpMentorBooking.Web.Controllers
 
             return View(mentorScheduleWeekVM);
         }
+
     }
 }

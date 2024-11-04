@@ -1,9 +1,9 @@
-<li class="nav-item">
+@* <li class="nav-item">
     <a class=" nav-link @(ViewContext.RouteData.Values["Action"].ToString() == "Index" ? "active" : "")" asp-action="Index" asp-controller="Mentor">
         <i class="fas fa-home"></i>
         <span>Homepage</span>
     </a>
-</li>
+</li> *@
 <li class="nav-item">
     <a class="nav-link  @(ViewContext.RouteData.Values["Action"].ToString() == "ViewSchedule" ? "active" : "")" asp-action="ViewSchedule" asp-controller="Mentor">
         <i class="fas fa-calendar"></i>
@@ -17,5 +17,8 @@
     </a>
 </li>
 <li class="nav-item">
-    <a class="nav-link @(ViewContext.RouteData.Values["Action"].ToString() == "ViewFeedbacks" ? "active" : "")" asp-action="ViewFeedbacks" asp-controller="Feedback">Feedback</a>
+    <a class="nav-link @(ViewContext.RouteData.Values["Action"].ToString() == "ViewFeedbacks" ? "active" : "")" asp-action="ViewFeedbacks" asp-controller="Feedback">
+        <i class="fa-solid fa-comments"></i>
+        <span>Feedback</span>
+    </a>
 </li>

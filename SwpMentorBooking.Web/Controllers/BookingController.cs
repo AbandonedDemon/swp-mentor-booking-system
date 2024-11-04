@@ -6,6 +6,7 @@ using SwpMentorBooking.Domain.Entities;
 using SwpMentorBooking.Web.ViewModels;
 using SwpMentorBooking.Web.Helpers;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace SwpMentorBooking.Web.Controllers
 {
@@ -487,7 +488,7 @@ namespace SwpMentorBooking.Web.Controllers
             return View(mentorBookingsVM);
         }
 
-        [Authorize(Roles = "Mentor, Student")]
+        [Authorize]
         [HttpGet("detail/{bookingId}")]
         // View booking detail based on bookingId
         public IActionResult ViewBookingDetail(int bookingId)
@@ -628,6 +629,183 @@ namespace SwpMentorBooking.Web.Controllers
             return RedirectToAction(nameof(ViewStudentBookings));
         }
 
+        // Booking management functionalities for ADMIN
+
+        [Authorize(Roles = Constants.UserRoles.Admin)]
+        [HttpGet("manage")]
+        public IActionResult ManageBookings(string status, int? groupId, int? mentorId, DateTime? startDate, DateTime? endDate, int page = 1, int pageSize = 10)
+        {
+            // Get all bookings with necessary includes
+            var bookingsQuery = _unitOfWork.Booking.GetAll(
+                includeProperties: "MentorSchedule.MentorDetail.User,MentorSchedule.Slot,Leader.User,Leader.Group"
+            );
+
+            // Apply filters
+            if (!string.IsNullOrEmpty(status))
+            {
+                bookingsQuery = bookingsQuery.Where(b => b.Status == status);
+            }
+
+            if (groupId.HasValue)
+            {
+                bookingsQuery = bookingsQuery.Where(b => b.Leader.GroupId == groupId);
+            }
+
+            if (mentorId.HasValue)
+            {
+                bookingsQuery = bookingsQuery.Where(b => b.MentorSchedule.MentorDetail.UserId == mentorId);
+            }
+
+            if (startDate.HasValue)
+            {
+                bookingsQuery = bookingsQuery.Where(b => b.MentorSchedule.Date >= DateOnly.FromDateTime(startDate.Value));
+            }
+
+            if (endDate.HasValue)
+            {
+                bookingsQuery = bookingsQuery.Where(b => b.MentorSchedule.Date <= DateOnly.FromDateTime(endDate.Value));
+            }
+
+            // Order by date
+            bookingsQuery = bookingsQuery.OrderByDescending(b => b.MentorSchedule.Date);
+
+            // Apply pagination
+            var totalItems = bookingsQuery.Count();
+            var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+
+            var bookings = bookingsQuery
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            // Get lists for dropdowns
+            var groups = _unitOfWork.StudentGroup.GetAll().Select(g => new SelectListItem
+            {
+                Value = g.Id.ToString(),
+                Text = g.GroupName
+            });
+
+            var mentors = _unitOfWork.Mentor.GetAll(includeProperties: nameof(User))
+                .Select(u => new SelectListItem
+                {
+                    Value = u.UserId.ToString(),
+                    Text = u.User.FullName
+                });
+
+            // Populate the view model
+            var bookingDetailsVM = bookings.Select(b => new BookingDetailVM
+            {
+                BookingId = b.Id,
+                GroupName = b.Leader.Group.GroupName,
+                MentorName = b.MentorSchedule.MentorDetail.User.FullName,
+                ScheduleDate = b.MentorSchedule.Date.ToDateTime(TimeOnly.MinValue),
+                SlotStartTime = b.MentorSchedule.Slot.StartTime,
+                SlotEndTime = b.MentorSchedule.Slot.EndTime,
+                Timestamp = b.Timestamp,
+                Status = b.Status,
+                Note = b.Note
+            }).ToList();
+
+            var manageBookingsVM = new ManageBookingsVM
+            {
+                Bookings = bookingDetailsVM,
+                Groups = groups,
+                Mentors = mentors,
+                CurrentPage = page,
+                TotalPages = totalPages,
+                Status = status,
+                SelectedGroupId = groupId,
+                SelectedMentorId = mentorId,
+                StartDate = startDate,
+                EndDate = endDate
+            };
+
+            return View(manageBookingsVM);
+        }
+
+        [Authorize(Roles = Constants.UserRoles.Admin)]
+        [HttpGet("manage/{bookingId}")]
+        public IActionResult ManageBookingDetail(int bookingId)
+        {
+            var booking = _unitOfWork.Booking.Get(b => b.Id == bookingId,
+                includeProperties: "MentorSchedule.MentorDetail.User,MentorSchedule.Slot,Leader.User,Leader.Group");
+
+            if (booking is null)
+            {
+                return NotFound();
+            }
+
+            var bookingDetailVM = new BookingDetailVM
+            {
+                BookingId = booking.Id,
+                GroupName = booking.Leader.Group.GroupName,
+                MentorName = booking.MentorSchedule.MentorDetail.User.FullName,
+                ScheduleDate = booking.MentorSchedule.Date.ToDateTime(TimeOnly.MinValue),
+                SlotStartTime = booking.MentorSchedule.Slot.StartTime,
+                SlotEndTime = booking.MentorSchedule.Slot.EndTime,
+                Note = booking.Note,
+                BookingCost = _bookingCost,
+                Timestamp = booking.Timestamp,
+                Status = booking.Status,
+                IsPastBooking = BookingScheduleHelper.IsBookingInPast(booking.MentorSchedule)
+            };
+
+            return View(bookingDetailVM);
+        }
+
+        [Authorize(Roles = Constants.UserRoles.Admin)]
+        [HttpPost("cancel")]
+        public IActionResult CancelBooking(int bookingId)
+        {
+            // Retrieve current booking
+            var booking = _unitOfWork.Booking.Get(b => b.Id == bookingId,
+                includeProperties: "MentorSchedule,Leader.Group.Wallet");
+
+            if (booking == null)
+            {
+                return NotFound();
+            }
+
+            using (var transaction = _unitOfWork.BeginTransaction())
+            {
+                try
+                {
+                    // Update booking status
+                    booking.Status = Constants.BookingStatus.Cancelled;
+                    _unitOfWork.Booking.Update(booking);
+
+                    // Update mentor schedule status
+                    booking.MentorSchedule.Status = Constants.MentorScheduleStatus.Available;
+                    _unitOfWork.MentorSchedule.Update(booking.MentorSchedule);
+
+                    // Refund the booking cost
+                    var walletTransaction = new WalletTransaction
+                    {
+                        WalletId = booking.Leader.Group.WalletId,
+                        Amount = _bookingCost,
+                        Type = Constants.WalletDefaults.TransactionTypeAddition,
+                        Description = Constants.TransactionDescriptions.RefundPayment,
+                        Date = DateTime.Now
+                    };
+                    _unitOfWork.WalletTransaction.Add(walletTransaction);
+
+                    // Update wallet balance
+                    booking.Leader.Group.Wallet.Balance += _bookingCost;
+                    _unitOfWork.Wallet.Update(booking.Leader.Group.Wallet);
+
+                    _unitOfWork.Save();
+                    transaction.Commit();
+                    TempData["success"] = "Booking cancelled and refunded successfully.";
+                }
+                catch (Exception)
+                {
+                    transaction.Rollback();
+                    TempData["error"] = "An error occurred while cancelling the booking.";
+                }
+            }
+
+            return RedirectToAction(nameof(ManageBookings));
+        }
 
     }
 }

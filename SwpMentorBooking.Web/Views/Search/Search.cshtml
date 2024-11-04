@@ -1,0 +1,137 @@
+﻿﻿@using System.Security.Claims;
+
+@model SearchMentorVM
+
+@{
+    ViewData["title"] = "Student Dashboard";
+    Layout = "_Layout"; // Change layout to _Layout
+    var mentorsList = Model.SearchResult;
+    var userRole = User.FindFirst(ClaimTypes.Role)?.Value;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link href="~/css/student/home.css" rel="stylesheet">
+
+</head>
+<body>
+    <div class="container-fluid min-vh-100 d-flex flex-column p-0">
+        <div class="d-flex flex-grow-1">
+            <div class="container-fluid">
+                <div class="card">
+                    <!--SearchBar & Filter-->
+                    <div class="container mt-3 d-flex justify-content-center">
+                        <div class="position-relative w-75">
+                            <form asp-controller="Search" asp-action="Search" method="get">
+                                <div class="row mb-3">
+                                    <div class="col-md-3">
+                                        <input type="text" name="searchTemp" value="@Model.SearchTemp" class="form-control" placeholder="Search...">
+                                    </div>
+                                    @* <div class="col-md-3">
+                                    <select name="Skill" class="form-select">
+                                    <option value="">All Skill</option>
+                                    @foreach (var s in Model.SearchSkill)
+                                    {
+                                    if (s.Name == Model.Skill)
+                                    {
+                                    <option value="@s.Name" selected>@s.Name</option>
+                                    }
+                                    <option value="@s.Name">@s.Name</option>
+                                    }
+                                    </select>
+                                    </div> *@
+
+
+                                    <div class="col-md-2">
+                                        <input type="number" id="minBookingScore" name="minBookingScore" min="0" value="@Model.minBookingScore" class="form-control" placeholder="Min Score" oninput="validateScores()" />
+                                    </div>
+                                    <div class="col-md-2">
+                                        <input type="number" id="maxBookingScore" name="maxBookingScore" min="0" value="@Model.maxBookingScore" class="form-control" placeholder="Max Score" oninput="validateScores()" />
+                                    </div>
+                                    <div class="col-md-2">
+                                        <button type="submit" class="btn btn-primary ">Search</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+
+                    <div class="content-wrapper">
+                        <div class="container py-5">
+                            @if (string.IsNullOrEmpty(Model.SearchTemp))
+                            {
+                                <h1 class="text-center mb-5">All Mentors</h1>
+                            }
+                            else
+                            {
+                                <h1 class="text-center mb-5">Search result for "@Model.SearchTemp"</h1>
+                            }
+                            <div id="mentorList" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                                @for (var i = 0; i < mentorsList.Count(); i++)
+                                {
+                                    var mentor = mentorsList[i];
+                                    var cssClass = i >= 9 ? "d-none" : "";
+                                    <div class="col @cssClass">
+                                        <div class="card h-100 mentor-card">
+                                            <img src="~/image/mentor-placeholder.jpg" class="card-img-top" alt="">
+                                            <div class="card-body">
+                                                <h5 class="card-title">@mentor.FullName</h5>
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <p>Score: @mentor.BookingScore</p>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <p>@string.Join(", ", mentor.MainProgrammingLanguage)</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="card-footer">
+                                                <a asp-controller="Student" asp-action="ViewMentorProfile" asp-route-mentorId="@mentor.UserId" class="btn btn-primary w-100">View Profile</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                            @if (mentorsList.Count > 9)
+                            {
+                                <div class="text-center mt-4">
+                                    <button id="loadMoreBtn" class="btn btn-primary">Load More</button>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+
+<script>
+    function validateScores() {
+        const minScore = document.getElementById("minBookingScore");
+        const maxScore = document.getElementById("maxBookingScore");
+
+        // Chuyển giá trị về số nguyên
+        const minVal = parseInt(minScore.value) || 0;
+        const maxVal = parseInt(maxScore.value) || 0;
+
+        // Kiểm tra nếu Min Score lớn hơn Max Score
+        if (minVal > maxVal) {
+            minScore.setCustomValidity("Min Score không được lớn hơn Max Score");
+        } else {
+            minScore.setCustomValidity("");
+        }
+    }
+</script>

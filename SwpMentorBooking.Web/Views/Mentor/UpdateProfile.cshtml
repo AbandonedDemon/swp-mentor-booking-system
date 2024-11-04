@@ -1,94 +1,102 @@
 ﻿@model MentorDetailVM
+@{
+    Layout = "_Layout";
+}
+<!DOCTYPE html>
+<html lang="en">
 
-<div class="card bg-purple text-white mb-4">
-    <div class="card-body">
-        <h1 class="text-center mb-0">Mentor Profile</h1>
-    </div>
-</div>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Student Profile</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="~/css/site.css" rel="stylesheet">
+</head>
 
-<div class="card-body border p-4">
-    <form method="post" asp-action="UpdateProfile">
-        <!-- Adjust the action as needed -->
-        <input type="hidden" asp-for="UserId" />
+<body>
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-body">
+                        <h2 class="card-title text-center mb-4">Edit Profile</h2>
+                        <form asp-action="UpdateProfile" method="post">
+                            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-        <div class="row">
-            <div class="col-md-8">
-                <div class="mb-3">
-                    <label asp-for="Email" class="form-label">Email:</label>
-                    <input readonly asp-for="Email" class="form-control" />
-                    <span asp-validation-for="Email" class="text-danger"></span>
+                            <div class="row mb-3">
+                                <div class="col-sm-4 d-flex align-items-center">
+                                    <strong>Full Name: </strong>
+                                </div>
+                                <div class="col-sm-8">
+                                    <input asp-for="FullName" class="form-control" readonly />
+                                    <span asp-validation-for="FullName" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-sm-4 d-flex align-items-center">
+                                    <strong>Gender: </strong>
+                                </div>
+                                <div class="col-sm-8">
+                                    <select class="form-select" asp-for="Gender">
+                                        <option value="Male">Male</option>
+                                        <option value="Female">Female</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                    <span asp-validation-for="Gender" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-sm-4 d-flex align-items-center">
+                                    <strong>Email: </strong>
+                                </div>
+                                <div class="col-sm-8">
+                                    <input asp-for="Email" class="form-control" readonly />
+                                    <span asp-validation-for="Email" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-sm-4 d-flex align-items-center">
+                                    <strong>Additional Contact Info </strong>
+                                </div>
+                                @for (int i = 0; i < Model.AdditionalContactInfo.Count; i++)
+                                {
+                                    <div class="col-sm-8">
+                                        <input asp-for="AdditionalContactInfo[i]" class="form-control" />
+                                        <span asp-validation-for="AdditionalContactInfo[i]" class="text-danger"></span>
+                                    </div>
+                                }
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-sm-4 d-flex align-items-center">
+                                    <strong>Phone: </strong>
+                                </div>
+                                <div class="col-sm-8">
+                                    <input asp-for="Phone" class="form-control" />
+                                    <span asp-validation-for="Phone" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div style="text-align: center;">
+                                <button type="submit" class="btn btn-primary w-30 ">Update Profile</button>
+                                <a asp-action="MyProfile" asp-controller="Mentor" class="btn btn-secondary">Cancel</a>
+                            </div>
+                        </form>
+                    </div>
                 </div>
-
-                <div class="mb-3">
-                    <label asp-for="FullName" class="form-label">Full Name:</label>
-                    <input readonly asp-for="FullName" class="form-control" />
-                    <span asp-validation-for="FullName" class="text-danger"></span>
-                </div>
-
-                <div class="mb-3">
-                    <label asp-for="Phone" class="form-label">Phone Number:</label>
-                    <input readonly asp-for="Phone" class="form-control" />
-                    <span asp-validation-for="Phone" class="text-danger"></span>
-                </div>
-
-                <div class="mb-3">
-                    <label asp-for="Gender" class="form-label">Gender:</label>
-                    <input readonly asp-for="Gender" class="form-control" />
-                    <span asp-validation-for="Gender" class="text-danger"></span>
-                </div>
-
-                <div class="mb-3">
-                    <label asp-for="MainProgrammingLanguage" class="form-label">Main Programming Language:</label>
-                    <input asp-for="MainProgrammingLanguage" class="form-control" />
-                    <span asp-validation-for="MainProgrammingLanguage" class="text-danger"></span>
-                </div>
-
-                <div class="mb-3">
-                    <label asp-for="AltProgrammingLanguage" class="form-label">Alternative Programming Language:</label>
-                    <input asp-for="AltProgrammingLanguage" class="form-control" />
-                    <span asp-validation-for="AltProgrammingLanguage" class="text-danger"></span>
-                </div>
-
-                <div class="mb-3">
-                    <label asp-for="Framework" class="form-label">Framework:</label>
-                    <input asp-for="Framework" class="form-control" />
-                    <span asp-validation-for="Framework" class="text-danger"></span>
-                </div>
-
-                <div class="mb-3">
-                    <label asp-for="Education" class="form-label">Education:</label>
-                    <input asp-for="Education" class="form-control" />
-                    <span asp-validation-for="Education" class="text-danger"></span>
-                </div>
-
-                <div class="mb-3">
-                    <label asp-for="AdditionalContactInfo" class="form-label">Additional Contact Info:</label>
-                    <input asp-for="AdditionalContactInfo" class="form-control" />
-                    <span asp-validation-for="AdditionalContactInfo" class="text-danger"></span>
-                </div>
-
-                <div class="mb-3">
-                    <label asp-for="BookingScore" class="form-label">Booking Score:</label>
-                    <input readonly asp-for="BookingScore" class="form-control" />
-                    <span asp-validation-for="BookingScore" class="text-danger"></span>
-                </div>
-
-                <div class="mb-3">
-                    <label asp-for="Description" class="form-label">Description:</label>
-                    <textarea asp-for="Description" class="form-control"></textarea>
-                    <span asp-validation-for="Description" class="text-danger"></span>
-                </div>
-
-                <button type="submit" class="btn btn-primary">Update Profile</button>
             </div>
         </div>
-    </form>
-</div>
+    </div>
 
-<style>
-    .bg-purple {
-        background-color: #6f42c1;
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
-</style>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+}

@@ -7,7 +7,10 @@
                 <div class="card-body">
                     <h2 class="card-title text-center">Wallet Transactions</h2>
                     <h5 class="text-center mb-4">Current Balance: @(Model.WalletBalance) points</h5>
-
+                    <a asp-action="MyGroup" asp-controller="Student"
+                    class="btn btn-secondary">
+                        Back to Group
+                        </a>
                     @if (Model.Transactions.Any())
                     {
                         <div class="table-responsive">

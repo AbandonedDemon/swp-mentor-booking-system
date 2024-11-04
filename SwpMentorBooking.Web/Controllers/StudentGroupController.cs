@@ -3,13 +3,14 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.IdentityModel.Tokens;
 using SwpMentorBooking.Application.Common.Interfaces;
+using SwpMentorBooking.Application.Common.Utilities;
 using SwpMentorBooking.Domain.Entities;
 using SwpMentorBooking.Web.ViewModels;
 using System.Security.Claims;
 
 namespace SwpMentorBooking.Web.Controllers
 {
-    [Authorize(Roles = "Student")]
+    [Authorize(Roles = $"{Constants.UserRoles.Student}, {Constants.UserRoles.Admin}")]
     [Route("student-group")]
     public class StudentGroupController : Controller
     {
@@ -20,6 +21,7 @@ namespace SwpMentorBooking.Web.Controllers
         }
 
         [HttpGet("")]
+        [Authorize(Roles = "Student")]
         public IActionResult Index()
         {
             return View();
@@ -27,6 +29,7 @@ namespace SwpMentorBooking.Web.Controllers
 
         // GET: /student-group/create
         [HttpGet("create")]
+        [Authorize(Roles = "Student")]
         public IActionResult Create()
         {
             StudentGroupVM studentGroupVM = new StudentGroupVM
@@ -43,6 +46,7 @@ namespace SwpMentorBooking.Web.Controllers
         // POST: /student-group/create
         [HttpPost("create")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Student")]
         public IActionResult Create(StudentGroupVM studentGroupVM)
         {
 
@@ -84,6 +88,7 @@ namespace SwpMentorBooking.Web.Controllers
         // GET: /student-group/add-member
         [HttpGet("add-member")]
         [Authorize(Policy = "GroupLeaderOnly")]
+        [Authorize(Roles = "Student")]
         public IActionResult AddMember()
         {
             var userEmail = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -101,6 +106,7 @@ namespace SwpMentorBooking.Web.Controllers
         // GET: /student-group/add-member/search
         [HttpGet("add-member/search")]
         [Authorize(Policy = "GroupLeaderOnly")]
+        [Authorize(Roles = "Student")]
         public IActionResult AddMember(SearchGroupMemberVM searchGroupMemberVM)
         {
 
@@ -129,6 +135,7 @@ namespace SwpMentorBooking.Web.Controllers
         // POST: /student-group/add-selected-members
         [HttpPost("add-selected-members")]
         [Authorize(Policy = "GroupLeaderOnly")]
+        [Authorize(Roles = "Student")]
         public IActionResult AddSelectedMembers(List<int> memberIds)
         {
             if (memberIds.IsNullOrEmpty())
@@ -178,5 +185,37 @@ namespace SwpMentorBooking.Web.Controllers
             TempData["success"] = "Group member(s) added successfully.";
             return RedirectToAction(actionName: "MyGroup", controllerName: "Student");
         }
+
+        [Authorize(Roles = Constants.UserRoles.Admin)]
+        [HttpGet("manage")]
+        public IActionResult ManageGroup()
+        {
+            // Get all groups with their related data
+            var groups = _unitOfWork.StudentGroup.GetAll(
+                includeProperties: $"{nameof(Topic)},{nameof(Wallet)},StudentDetails.User"
+            ).ToList();
+
+            // Map to view model
+            var manageGroupsVM = new ManageGroupVM
+            {
+                Groups = groups.Select(g => new ManageGroupDetailVM
+                {
+                    GroupId = g.Id,
+                    GroupName = g.GroupName,
+                    TopicName = g.Topic.Name,
+                    WalletBalance = g.Wallet.Balance,
+                    Members = g.StudentDetails.Select(s => new StudentDetailVM
+                    {
+                        UserId = s.UserId,
+                        FullName = s.User.FullName,
+                        Email = s.User.Email,
+                        StudentCode = s.StudentCode,
+                    }).ToList()
+                }).ToList()
+            };
+
+            return View(manageGroupsVM);
+        }
+
     }
 }

@@ -24,3 +24,17 @@ function filterUser() {
         }
     }
 }
+
+const loadMoreBtn = document.getElementById('loadMoreBtn');
+const hiddenMentors = document.querySelectorAll('.d-none');
+let currentIndex = 0;
+
+loadMoreBtn.addEventListener('click', () => {
+    for (let i = 0; i < 9 && currentIndex < hiddenMentors.length; i++) {
+        hiddenMentors[currentIndex].classList.remove('d-none');
+        currentIndex++;
+    }
+    if (currentIndex >= hiddenMentors.length) {
+        loadMoreBtn.style.display = 'none';
+    }
+});

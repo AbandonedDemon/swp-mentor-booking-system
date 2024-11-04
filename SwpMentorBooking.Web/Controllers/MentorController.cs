@@ -58,6 +58,63 @@ namespace SwpMentorBooking.Web.Controllers
             return View(mentorProfileVM);
         }
 
+        [HttpGet("profile/update")]
+        public IActionResult UpdateProfile()
+        {
+            var userEmail = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var mentor = _unitOfWork.Mentor.Get(u => u.User.Email == userEmail, includeProperties: $"{nameof(User)},Skills,Specs");
+
+            if (mentor is null)
+            {
+                return NotFound();
+            }
+            // Ensure the user is only accessing their own profile
+            if (mentor.User.Role != "Mentor")
+            {
+                return Forbid();
+            }
+
+            var mentorDetailVM = new MentorDetailVM
+            {
+                UserId = mentor.UserId,
+                Email = mentor.User.Email,
+                FullName = mentor.User.FullName,
+                Phone = mentor.User.Phone,
+                Gender = mentor.User.Gender,
+                // Split the properties by the delimiter
+                MainProgrammingLanguage = _utilService.StringManipulation.SplitProperty(mentor?.MainProgrammingLanguage, ","),
+                AltProgrammingLanguage = _utilService.StringManipulation.SplitProperty(mentor?.AltProgrammingLanguage, ","),
+                Framework = _utilService.StringManipulation.SplitProperty(mentor?.Framework, "||"),
+                Education = _utilService.StringManipulation.SplitProperty(mentor?.Education, ","),
+                AdditionalContactInfo = _utilService.StringManipulation.SplitProperty(mentor?.AdditionalContactInfo, ","),
+                BookingScore = mentor?.BookingScore,
+                Description = mentor?.Description,
+                Skills = mentor.Skills.ToList(),
+                Specializations = mentor.Specs.ToList(),
+            };
+            return View(mentorDetailVM);
+        }
+
+        [HttpPost("profile/update")]
+        public IActionResult UpdateProfile(MentorDetailVM updatedModel)
+        {
+            if (ModelState.IsValid)
+            {
+                var userEmail = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                var user = _unitOfWork.User.Get(u => u.Email == userEmail, includeProperties: nameof(MentorDetail));
+                if (user != null)
+                {
+                    user.MentorDetail.AdditionalContactInfo = string.Join(", ", updatedModel.AdditionalContactInfo);
+                    user.Gender = updatedModel.Gender;
+                    user.Phone = updatedModel.Phone;
+                    _unitOfWork.Save();
+
+                }
+                TempData["ValidateMessage"] = "Update successful!";
+            }
+            return RedirectToAction("MyProfile");
+        }
+
         [HttpGet("schedule")]
         public IActionResult ViewSchedule(DateTime? startDate)
         {

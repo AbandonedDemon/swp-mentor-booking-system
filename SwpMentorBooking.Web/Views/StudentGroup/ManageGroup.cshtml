@@ -1,0 +1,63 @@
+﻿@{
+    ViewBag.Title = "Manage Student Groups";
+    Layout = "_Layout";
+
+}
+
+@model ManageGroupVM
+
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h2 class="mb-0">Manage Student Groups</h2>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Group Name</th>
+                            <th>Topic</th>
+                            <th>Wallet Balance</th>
+                            <th>Members</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var group in Model.Groups)
+                        {
+                            <tr>
+                                <td>@group.GroupName</td>
+                                <td>@group.TopicName</td>
+                                <td>@group.WalletBalance points</td>
+                                <td>
+                                    <button class="btn btn-info btn-sm" type="button"
+                                            data-bs-toggle="collapse"
+                                            data-bs-target="#members_@group.GroupId">
+                                        View Members (@group.Members.Count)
+                                    </button>
+                                    <div class="collapse mt-2" id="members_@group.GroupId">
+                                        <ul class="list-group">
+                                            @foreach (var member in group.Members)
+                                            {
+                                                <li class="list-group-item">
+                                                    @member.FullName (@member.StudentCode)
+                                                </li>
+                                            }
+                                        </ul>
+                                    </div>
+                                </td>
+                                <td>
+                                    <a href="@Url.Action("ViewTransactions", "Wallet", new { groupId = group.GroupId })"
+                                       class="btn btn-primary btn-sm">
+                                        View Transactions
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,134 +1,183 @@
 ﻿@model MentorBookingsVM
 
-<h2>Bookings</h2>
+<!DOCTYPE html>
+<html lang="en">
 
-<form asp-action="ViewStudentBookings" method="get" class="mb-4">
-    <div class="row">
-        <div class="col-md-3">
-            <label for="status">Status:</label>
-            <select name="status" id="status" class="form-control">
-                <option value="">All</option>
-                <option value="pending" selected="@(Model.Status == "pending")">Pending</option>
-                <option value="confirmed" selected="@(Model.Status == "confirmed")">Confirmed</option>
-                <option value="cancelled" selected="@(Model.Status == "cancelled")">Cancelled</option>
-            </select>
-        </div>
-        <div class="col-md-3">
-            <label for="startDate">Start Date:</label>
-            <input type="date" name="startDate" id="startDate" class="form-control" value="@Model.StartDate?.ToString("yyyy-MM-dd")">
-        </div>
-        <div class="col-md-3">
-            <label for="endDate">End Date:</label>
-            <input type="date" name="endDate" id="endDate" class="form-control" value="@Model.EndDate?.ToString("yyyy-MM-dd")">
-        </div>
-        <div class="col-md-3 d-flex align-items-end">
-            <button type="submit" class="btn btn-primary">Filter</button>
-        </div>
-    </div>
-</form>
-
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>#</th>
-            <th>Mentor Name</th>
-            <th>Schedule Date</th>
-            <th>Schedule Time</th>
-            <th>Booking Date</th>
-            <th>Booking Time</th>
-            <th>Status</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @for (int i = 0; i < Model.Bookings.Count; i++)
-        {
-            var booking = Model.Bookings[i];
-            <tr>
-                <td>@(i + 1)</td>
-                <td>@booking.MentorName</td>
-                <td>@booking.ScheduleDate.ToString("dddd, MMMM d, yyyy")</td>
-                <td>@booking.SlotStartTime.ToString("HH:mm") - @booking.SlotEndTime.ToString("HH:mm")</td>
-                <td>@booking.Timestamp.ToString("dd-MM-yyyy")</td>
-                <td>@booking.Timestamp.ToString("HH:mm")</td>
-                <td>@booking.Status</td>
-                <td>
-                    <a asp-action="ViewBookingDetail" asp-route-bookingId="@booking.BookingId" class="btn btn-primary btn-sm">View Details</a>
-                    @if (booking.IsCompletable)
-                    {
-                        <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#completeModal" data-booking-id="@booking.BookingId">
-                            Meeting Complete
-                        </button>
-                    }
-                    @if (booking.IsFeedbackable)
-                    {
-                        <a asp-controller="Feedback" asp-action="SendFeedbackStudent" asp-route-bookingId="@booking.BookingId"
-                           class="btn btn-warning btn-sm">Send Feedback</a>
-                    }
-                </td>
-            </tr>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Set Schedule - Mentoring</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/bookings.css" asp-append-version="true" />
+    <style>
+        .content-box {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-top: 20px;
         }
-    </tbody>
-</table>
+    </style>
+</head>
 
-<nav aria-label="Page navigation">
-    <ul class="pagination">
-        @for (int i = 1; i <= Model.TotalPages; i++)
-        {
-            <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
-                <a class="page-link" href="@Url.Action("ViewStudentBookings", new { page = i, status = Model.Status, startDate = Model.StartDate, endDate = Model.EndDate })">@i</a>
-            </li>
-        }
-    </ul>
-</nav>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Main content -->
+            <main class="col-md-12 ms-sm-auto col-lg-12 px-md-4">
+                <div class="content-box">
+                    <h2>Bookings</h2>
 
-<a asp-controller="Student" asp-action="Index" class="btn btn-secondary">Back to Home</a>
+                    <form asp-action="ViewStudentBookings" method="get" class="mb-4">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <label for="status">Status:</label>
+                                <select name="status" id="status" class="form-control">
+                                    <option value="">All</option>
+                                    <option value="pending" selected="@(Model.Status == "pending")">Pending</option>
+                                    <option value="confirmed" selected="@(Model.Status == "confirmed")">Confirmed</option>
+                                    <option value="cancelled" selected="@(Model.Status == "cancelled")">Cancelled</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="startDate">Start Date:</label>
+                                <input type="date" name="startDate" id="startDate" class="form-control"
+                                       value="@Model.StartDate?.ToString("yyyy-MM-dd")">
+                            </div>
+                            <div class="col-md-3">
+                                <label for="endDate">End Date:</label>
+                                <input type="date" name="endDate" id="endDate" class="form-control"
+                                       value="@Model.EndDate?.ToString("yyyy-MM-dd")">
+                            </div>
+                            <div class="col-md-3 d-flex align-items-end">
+                                <button type="submit" class="btn btn-primary">Filter</button>
+                            </div>
+                        </div>
+                    </form>
 
-<!-- Confirmation Modal -->
-<div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="confirmModalLabel">Confirm Booking</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                Do you want to confirm this booking?
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <form id="confirmForm" asp-controller="Booking" asp-action="ApproveBooking" method="post">
-                    <input hidden id="bookingIdInput" name="bookingId" value="" />
-                    <button type="submit" class="btn btn-success">Confirm</button>
-                </form>
-            </div>
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Mentor Name</th>
+                                    <th>Schedule Date</th>
+                                    <th>Schedule Time</th>
+                                    <th>Booking Date</th>
+                                    <th>Booking Time</th>
+                                    <th>Status</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (int i = 0; i < Model.Bookings.Count; i++)
+                                {
+                                    var booking = Model.Bookings[i];
+                                    <tr>
+                                        <td>@(i + 1)</td>
+                                        <td>@booking.MentorName</td>
+                                        <td>@booking.ScheduleDate.ToString("dd-MM-yyyy")</td>
+                                        <td>@booking.SlotStartTime.ToString("HH:mm") - @booking.SlotEndTime.ToString("HH:mm")</td>
+                                        <td>@booking.Timestamp.ToString("dd-MM-yyyy")</td>
+                                        <td>@booking.Timestamp.ToString("HH:mm")</td>
+                                        <td>
+                                            <span class="badge @(booking.Status switch {
+                            var s when s == Constants.BookingStatus.Pending => "bg-warning",
+                            var s when s == Constants.BookingStatus.Confirmed => "bg-primary",
+                            var s when s == Constants.BookingStatus.Cancelled => "bg-danger",
+                            var s when s == Constants.BookingStatus.Completed => "bg-success",
+                            _ => "bg-secondary"
+                        })">
+                                                @StringHelper.CapitalizeFirstLetter(booking.Status)
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <a asp-action="ViewBookingDetail" asp-route-bookingId="@booking.BookingId"
+                                               class="btn btn-primary btn-sm">View Details</a>
+                                            @if (booking.IsCompletable)
+                                            {
+                                                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal"
+                                                        data-bs-target="#completeModal" data-booking-id="@booking.BookingId">
+                                                    Meeting Complete
+                                                </button>
+                                            }
+                                            @if (booking.IsFeedbackable)
+                                            {
+                                                <a asp-controller="Feedback" asp-action="SendFeedbackStudent" asp-route-bookingId="@booking.BookingId"
+                                                   class="btn btn-warning btn-sm">Send Feedback</a>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination">
+                            @for (int i = 1; i <= Model.TotalPages; i++)
+                            {
+                                <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                                    <a class="page-link"
+                                       href="@Url.Action("ViewStudentBookings", new { page = i, status = Model.Status, startDate = Model.StartDate, endDate = Model.EndDate })">@i</a>
+                                </li>
+                            }
+                        </ul>
+                    </nav>
+
+                    <a asp-controller="Student" asp-action="Index" class="btn btn-secondary">Back to Home</a>
+
+                    <!-- Confirmation Modal -->
+                    <div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="confirmModalLabel">Confirm Booking</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    Do you want to confirm this booking?
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                    <form id="confirmForm" asp-controller="Booking" asp-action="ApproveBooking" method="post">
+                                        <input hidden id="bookingIdInput" name="bookingId" value="" />
+                                        <button type="submit" class="btn btn-success">Confirm</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Complete Meeting Modal -->
+                    <div class="modal fade" id="completeModal" tabindex="-1" aria-labelledby="completeModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="completeModalLabel">Complete Meeting</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    Are you sure you want to mark this meeting as complete?
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                    <form id="completeForm" asp-controller="Booking" asp-action="CompleteBooking" method="post">
+                                        <input hidden id="completeBookingIdInput" name="bookingId" value="" />
+                                        <button type="submit" class="btn btn-primary">Complete Meeting</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
         </div>
     </div>
-</div>
 
-<!-- Complete Meeting Modal -->
-<div class="modal fade" id="completeModal" tabindex="-1" aria-labelledby="completeModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="completeModalLabel">Complete Meeting</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                Are you sure you want to mark this meeting as complete?
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <form id="completeForm" asp-controller="Booking" asp-action="CompleteBooking" method="post">
-                    <input hidden id="completeBookingIdInput" name="bookingId" value="" />
-                    <button type="submit" class="btn btn-primary">Complete Meeting</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
-@section Scripts {
     <script src="~/js/approveBooking.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-}
+
+</body>
+
+</html>

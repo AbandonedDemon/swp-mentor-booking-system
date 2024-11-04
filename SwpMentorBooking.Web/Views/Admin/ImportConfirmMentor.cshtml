@@ -1,183 +1,155 @@
 ﻿@model ImportUserPreviewVM<CSVMentorDTO>
 
-<div class="card bg-purple text-white mb-4">
-    <div class="card-body">
-        <h1 class="text-center mb-0">Mentor List Preview</h1>
-    </div>
-</div>
+<!DOCTYPE html>
+<html lang="en">
 
-<span class="text-warning">Warning: Make sure the imported data is valid.</span>
-@if (Model.ImportErrors != null && Model.ImportErrors.Any())
-{   // There has been import errors
-    <div class="alert alert-danger">
-        <h4>Import Errors:</h4>
-        <ul>
-            @foreach (var error in Model.ImportErrors)
-            {
-                <li>@error</li>
-            }
-        </ul>
-    </div>
-}
-<div class="table-responsive">
-    <table class="table table-hover table-bordered shadow-sm">
-        <thead class="bg-purple text-white">
-            <tr>
-                <th>Email</th>
-                <th>Full Name</th>
-                <th>Phone</th>
-                <th>Gender</th>
-                <th>Skills</th>
-                <th>Specialization</th>
-                <th>Main Programming Languages</th>
-                <th>Alternative Programming Languages</th>
-                <th>Frameworks</th>
-                <th>Data Format Status</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Model.Results)
-            {
-                <tr>
-                    <td class="align-middle">@item.Record.Email</td>
-                    <td class="align-middle">@item.Record.FullName</td>
-                    <td class="align-middle">@item.Record.Phone</td>
-                    <td class="align-middle">@item.Record.Gender</td>
-                    <td class="align-middle">@item.Record.Skills</td>
-                    <td class="align-middle">@item.Record.Specialization</td>
-                    <td class="align-middle">
-                        @if (item.Record.MainProgrammingLanguageList.Any())
-                        {
-                            <ul>
-                                @foreach (var lang in item.Record.MainProgrammingLanguageList)
-                                {
-                                    <li>@lang</li>
-                                }
-                            </ul>
-                        }
-                        else
-                        {
-                            <span>Not specified</span>
-                        }
-                    </td>
-                    <td class="align-middle">
-                        @if (item.Record.AltProgrammingLanguageList.Any())
-                        {
-                            <ul>
-                                @foreach (var lang in item.Record.AltProgrammingLanguageList)
-                                {
-                                    <li>@lang</li>
-                                }
-                            </ul>
-                        }
-                        else
-                        {
-                            <span>Not specified</span>
-                        }
-                    </td>
-                    <td class="align-middle">
-                        @if (item.Record.FrameworkList.Any())
-                        {
-                            <ul>
-                                @foreach (var framework in item.Record.FrameworkList)
-                                {
-                                    <li>@framework</li>
-                                }
-                            </ul>
-                        }
-                        else
-                        {
-                            <span>Not specified</span>
-                        }
-                    </td>
-                    <td class="align-middle">
-                        @if (item.Errors.Any())
-                        {
-                            <ul>
-                                @foreach (var error in item.Errors)
-                                {
-                                    <li class="text-danger">@error</li>
-                                }
-                            </ul>
-                        }
-                        else
-                        {
-                            <span class="text-success">Valid</span>
-                        }
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
-</div>
-<div class="row pt-2">
-    <div class="col-6 col-md-3">
-        <form asp-controller="Admin" asp-action="ImportConfirm" method="post">
-            <input type="hidden" name="DTOJson" value='@Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.Results.Where(r => !r.Errors.Any()).Select(r => r.Record)))' />
-            <input type="hidden" name="SelectedUserType" value="Mentor" />
-            <button type="submit" class="btn btn-success w-100">Confirm Import</button>
-        </form>
-    </div>
-    <div class="col-6 col-md-3">
-        <a asp-controller="Admin" asp-action="Import" class="btn btn-secondary w-100">Cancel</a>
-    </div>
-</div>
-<style>
-    /* From Uiverse.io by nikk7007 */
-    .switch {
-        --false: #00308F;
-        --true: #FF5733;
-    }
-
-    input[type=checkbox] {
-        appearance: none;
-        height: 2rem;
-        width: 8rem;
-        background-color: #fff;
-        position: relative;
-        border-radius: .2em;
-        cursor: pointer;
-    }
-
-        input[type=checkbox]::before {
-            text-align: center;
-            color: #fff;
-            font-weight: bold;
-            content: 'Mentor';
-            display: block;
-            height: 1.9em;
-            width: 4em;
-            transform: translate(-50%, -50%);
-            position: absolute;
-            top: 50%;
-            left: calc(1.9em/2 + .3em);
-            background-color: var(--false);
-            border-radius: .2em;
-            transition: .3s ease;
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student List Preview</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/wwwroot/css/admin.css">
+    <style>
+        .content-box {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-top: 20px;
         }
+    </style>
+</head>
 
-        input[type=checkbox]:checked::before {
-            content: "Student";
-            background-color: var(--true);
-            left: calc(100% - (1.9em/2 + .3em));
-        }
+<body>
+    <!-- Main content with sidebar -->
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Main content -->
+            <main class="col-md-12 ms-sm-auto col-lg-12 px-md-4">
+                <div class="content-box">
+                    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                        <h1 class="h2">Mentor List Preview</h1>
+                    </div>
+                    <span class="text-warning">Warning: Make sure the imported data is valid.</span>
+                    @if (Model.ImportErrors != null && Model.ImportErrors.Any())
+                    { // There has been import errors
+                        <div class="alert alert-danger">
+                            <h4>Import Errors:</h4>
+                            <ul>
+                                @foreach (var error in Model.ImportErrors)
+                                {
+                                    <li>@error</li>
+                                }
+                            </ul>
+                        </div>
+                    }
+                    <!-- Table Results -->
+                    <div class="table-responsive mt-4">
+                        <table class="table table-hover table-bordered shadow-sm">
+                            <thead class="bg-purple text-white">
+                                <tr>
+                                    <th>Email</th>
+                                    <th>Full Name</th>
+                                    <th>Phone</th>
+                                    <th>Gender</th>
+                                    <th>Programming Languages</th>
+                                    <th>Frameworks</th>
+                                    <th>Data Format Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.Results)
+                                {
+                                    <tr>
+                                        <td class="align-middle">@item.Record.Email</td>
+                                        <td class="align-middle">@item.Record.FullName</td>
+                                        <td class="align-middle">@item.Record.Phone</td>
+                                        <td class="align-middle">@item.Record.Gender</td>
+                                        <td class="align-middle">
+                                            <strong>Main:</strong>
+                                            @if (item.Record.MainProgrammingLanguageList.Any())
+                                            {
+                                                <ul>
+                                                    @foreach (var lang in item.Record.MainProgrammingLanguageList)
+                                                    {
+                                                        <li>@lang</li>
+                                                    }
+                                                </ul>
+                                            }
+                                            else
+                                            {
+                                                <span>None</span>
+                                            }
+                                            <strong>Alternative:</strong>
+                                            @if (item.Record.AltProgrammingLanguageList.Any())
+                                            {
+                                                <ul>
+                                                    @foreach (var lang in item.Record.AltProgrammingLanguageList)
+                                                    {
+                                                        <li>@lang</li>
+                                                    }
+                                                </ul>
+                                            }
+                                            else
+                                            {
+                                                <span>None</span>
+                                            }
+                                        </td>
+                                        <td class="align-middle">
+                                            @if (item.Record.FrameworkList.Any())
+                                            {
+                                                <ul>
+                                                    @foreach (var framework in item.Record.FrameworkList)
+                                                    {
+                                                        <li>@framework</li>
+                                                    }
+                                                </ul>
+                                            }
+                                            else
+                                            {
+                                                <span>None</span>
+                                            }
+                                        </td>
+                                        <td class="align-middle">
+                                            @if (item.Errors.Any())
+                                            {
+                                                <ul>
+                                                    @foreach (var error in item.Errors)
+                                                    {
+                                                        <li class="text-danger">@error</li>
+                                                    }
+                                                </ul>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-success">Valid</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
 
-    /*=============================*/
-    .bg-purple {
-        background-color: #6f42c1;
-    }
+                    <div class="row pt-2 mt-4">
+                        <div class="col-6 col-md-3">
+                            <form asp-controller="Admin" asp-action="ImportConfirm" method="post">
+                                <input type="hidden" name="DTOJson"
+                                       value='@Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.Results.Where(r => !r.Errors.Any()).Select(r => r.Record)))' />
+                                <input type="hidden" name="SelectedUserType" value="Mentor" />
+                                <button type="submit" class="btn btn-success w-100">Confirm Import</button>
+                            </form>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <a asp-controller="Admin" asp-action="Import" class="btn btn-secondary w-100">Cancel</a>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
 
-    .text-purple {
-        color: #6f42c1;
-    }
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
 
-    .btn-purple {
-        background-color: #6f42c1;
-        color: white;
-    }
-
-        .btn-purple:hover {
-            background-color: #5a32a3;
-            color: white;
-        }
-</style>
+</html>

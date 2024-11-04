@@ -1,84 +1,111 @@
 ﻿    @model MentorScheduleWeekVM
 
-<h2>Schedule for mentor: @Model.MentorFullName</h2>
-<a asp-controller="Mentor" asp-action="SetSchedule" class="btn btn-primary"><i class="bi bi-pencil-square"></i> Edit Schedule</a>
-<table class="table table-bordered">
-    <thead>
-        <tr>
-            <th>Slot</th>
-            @for (var day = 0; day < 7; day++)
-            {
-                <th>@Model.WeekStartDate.AddDays(day).ToString("ddd - dd/MM")</th>
-            }
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var slot in Model.Slots)
-
-        {
-            <tr>
-                <td>
-                    Slot @slot.Id
-                    (@slot.StartTime.ToString(@"HH\:mm") - @slot.EndTime.ToString(@"HH\:mm"))
-                </td>
-                @for (var day = 0; day < 7; day++)
-
-                {
-
-                    var schedules = Model.DailySchedules.FirstOrDefault(ds => ds.Date == Model.WeekStartDate.AddDays(day))?.MentorSchedules;
-
-                    var currentSchedule = schedules?.FirstOrDefault(ms => ms.SlotId == slot.Id);
-                    <td>
-                        @if (currentSchedule != null)
-
-                        {
-                            <a asp-action="ViewSchedulePreview"
-                               asp-route-scheduleId="@currentSchedule.Id"
-                               style="text-decoration: none;"
-                               data-bs-toggle="ajax-modal"
-                               data-bs-target="#scheduleModal">
-                                <div class="status-slot">
-                                    <strong>@currentSchedule.SlotStartTime - @currentSchedule.SlotEndTime</strong> <br />
-                                    @if (currentSchedule.Status == "available")
-                                    {
-                                        <span class="badge bg-success">Available</span>
-                                    }
-                                    else if (currentSchedule.Status == "booked")
-                                    {
-                                        <span class="badge bg-danger">Booked</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge bg-warning">Unavailable</span>
-                                    }
-                                </div>
-                            </a>
-                        }
-
-                        else
-
-                        {
-                            <span class="text-muted">-</span>
-                        }
-                    </td>
-                }
-            </tr>
+<head>
+    <style>
+        .content-box {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-top: 20px;
         }
-    </tbody>
-</table>
-<a href="@Url.Action("ViewSchedule", new { startDate = Model.WeekStartDate.AddDays(-7) })" class="btn btn-primary">Previous Week</a>
-<a href="@Url.Action("ViewSchedule", new { startDate = Model.WeekStartDate.AddDays(7) })" class="btn btn-primary">Next Week</a>
+    </style>
+</head>
 
+<div class="container-fluid">
+    <div class="row">
+        <!-- Main content -->
+        <main class="col-md-12 ms-sm-auto col-lg-12 px-md-4">
+            <div class="content-box">
+                <h2>Schedule for mentor: @Model.MentorFullName</h2>
+                <a asp-controller="Mentor" asp-action="SetSchedule" class="btn btn-primary">
+                    <i class="bi bi-pencil-square"></i> Edit
+                    Schedule
+                </a>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Slot</th>
+                            @for (var day = 0; day < 7; day++)
+                            {
+                                <th>@Model.WeekStartDate.AddDays(day).ToString("ddd - dd/MM")</th>
+                            }
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var slot in Model.Slots)
+
+                        {
+                            <tr>
+                                <td>
+                                    Slot @slot.Id
+                                    (@slot.StartTime.ToString(@"HH\:mm") - @slot.EndTime.ToString(@"HH\:mm"))
+                                </td>
+                                @for (var day = 0; day < 7; day++)
+
+                                {
+
+                                    var schedules = Model.DailySchedules.FirstOrDefault(ds => ds.Date ==
+                                    Model.WeekStartDate.AddDays(day))?.MentorSchedules;
+
+                                    var currentSchedule = schedules?.FirstOrDefault(ms => ms.SlotId == slot.Id);
+                                    <td>
+                                        @if (currentSchedule != null)
+
+                                        {
+                                            <a asp-action="ViewSchedulePreview" asp-route-scheduleId="@currentSchedule.Id"
+                                               style="text-decoration: none;" data-bs-toggle="ajax-modal" data-bs-target="#scheduleModal">
+                                                <div class="status-slot">
+                                                    <strong>@currentSchedule.SlotStartTime - @currentSchedule.SlotEndTime</strong> <br />
+                                                    @if (currentSchedule.Status == "available")
+                                                    {
+                                                        <span class="badge bg-success">Available</span>
+                                                    }
+                                                    else if (currentSchedule.Status == "booked")
+                                                    {
+                                                        <span class="badge bg-danger">Booked</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge bg-warning">Unavailable</span>
+                                                    }
+                                                </div>
+                                            </a>
+                                        }
+
+                                        else
+
+                                        {
+                                            <span class="text-muted">-</span>
+                                        }
+                                    </td>
+                                }
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+                <a href="@Url.Action("ViewSchedule", new { startDate = Model.WeekStartDate.AddDays(-7) })"
+                   class="btn btn-primary">Previous Week</a>
+                <a href="@Url.Action("ViewSchedule", new { startDate = Model.WeekStartDate.AddDays(7) })" class="btn btn-primary">
+                    Next
+                    Week
+                </a>
+            </div>
+        </main>
+    </div>
+</div>
 <div class="col-md-4" id="schedulePreview">
     <!-- The preview will be loaded here -->
 </div>
-<div class="modal fade" id="scheduleModal" tabindex="-1" role="dialog" aria-labelledby="scheduleModalLabel" aria-hidden="true">
+<div class="modal fade" id="scheduleModal" tabindex="-1" role="dialog" aria-labelledby="scheduleModalLabel"
+     aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <!-- Modal content will be loaded here -->
         </div>
     </div>
 </div>
+
 
 @section Scripts {
     <script src="~/lib/microsoft/signalr/dist/browser/signalr.js"></script>

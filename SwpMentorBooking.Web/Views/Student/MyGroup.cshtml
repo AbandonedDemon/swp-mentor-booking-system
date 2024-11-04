@@ -79,17 +79,18 @@ else
                             <div class="card-body border p-4">
                                 <h2>You are not in any group.</h2>
                                 <span>Mind getting started with a group?</span>
-                                <a asp-action="Create" asp-controller="StudentGroup">Create a group</a>
+                                <a asp-action="Create" asp-controller="StudentGroup" class="btn btn-success">Create a group</a>
                             </div>
                         }
                         else
                         {
-                            <h2 class="card-title">Group Name: @Model.StudentGroup.GroupName</h2>
+                            <h2 class="card-title">Group: @Model.StudentGroup.GroupName</h2>
                             <h5 class="card-subtitle mb-2 text-muted">Topic: @Model.StudentGroup.Topic?.Name</h5>
                             <div class="d-flex justify-content-between align-items-center">
-                            <p class="card-text"><strong>Wallet Points:</strong> @Model.StudentGroup.Wallet.Balance</p>
+                                <p class="card-text"><strong>Wallet Points:</strong> @Model.StudentGroup.Wallet.Balance</p>
                                 <div>
-                                    <a href="@Url.Action("ViewTransactions", "Wallet")" class="btn btn-primary"><i class="fas fa-history"></i> Transactions</a></div>
+                                    <a href="@Url.Action("ViewTransactions", "Wallet")" class="btn btn-primary"><i class="fas fa-history"></i> Transactions</a>
+                                </div>
                             </div>
                             <h5 class="mt-4">Members:</h5>
                             <ul class="member-list">
@@ -129,7 +130,7 @@ else
                                 @if (Model.Student.IsLeader)
                                 {
                                     <!-- Button to submit a new request -->
-                                    <a href="@Url.Action("SendRequest", "Request")" class="btn btn-success">Submit Request for Wallet Points</a>
+                                    <a href="@Url.Action("SendRequest", "Request")" class="btn btn-success">Submit a Request</a>
                                 }
                             </div>
                         }

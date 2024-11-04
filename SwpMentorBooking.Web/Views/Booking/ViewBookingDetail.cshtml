@@ -19,7 +19,18 @@
         <p><strong>Note:</strong> @Model.Note</p>
         <p><strong>Booking Cost:</strong> @Model.BookingCost</p>
         <p><strong>Booking Time:</strong> @Model.Timestamp.ToString("yyyy-MM-dd HH:mm:ss")</p>
-        <p><strong>Status:</strong> @Model.Status</p>
+        <p>
+            <strong>Status:</strong>
+            <span class="badge @(Model.Status switch {
+                            var s when s == Constants.BookingStatus.Pending => "bg-warning",
+                            var s when s == Constants.BookingStatus.Confirmed => "bg-primary",
+                            var s when s == Constants.BookingStatus.Cancelled => "bg-danger",
+                            var s when s == Constants.BookingStatus.Completed => "bg-success",
+                            _ => "bg-secondary"
+                        })">
+                @StringHelper.CapitalizeFirstLetter(Model.Status)
+            </span>
+        </p>
 
         @if (Model.IsApprovable)
         {
@@ -36,7 +47,7 @@
         @if (Model.IsFeedbackable)
         {
             <a asp-controller="Feedback" asp-action=@("SendFeedback" + userRole) asp-route-bookingId="@Model.BookingId"
-            class="btn btn-warning btn-sm">Send Feedback</a>
+               class="btn btn-warning btn-sm">Send Feedback</a>
         }
     </div>
 </div>

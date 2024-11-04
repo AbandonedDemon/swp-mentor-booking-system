@@ -9,7 +9,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - SwpMentorBooking.Web</title>
+    <title>@ViewData["Title"] - SMBS</title>
     @* <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" /> *@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
@@ -32,13 +32,13 @@
                         <ul class="dropdown-menu dropdown-menu-end text-small shadow" aria-labelledby="dropdownUser1">
                             <li><span class="dropdown-item-text" id="leaderNameDropdown">@User.Identity.Name</span></li>
                             <li><hr class="dropdown-divider"></li>
-                            @if(userRole != "Admin")
+                            @if (userRole != "Admin")
                             {
                                 <li><a class="dropdown-item" asp-action="MyProfile" asp-controller="@userRole">Profile</a></li>
                                 <li>
                                     <a class="dropdown-item" asp-action="ChangePassword" asp-controller="Account">Change password</a>
                                 </li>
-                            }                          
+                            }
                             <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#logoutModal" id="dropdownLogout">Log out</a></li>
                         </ul>
                     </div>
@@ -48,29 +48,29 @@
 
 
         <!--Navbar-->
-        @if (User.Identity.IsAuthenticated) {
-            <div class="d-flex flex-grow-1 mt-5 pt-3">
+        @if (User.Identity.IsAuthenticated)
+        {
+            <div class="d-flex flex-grow-0 mt-5 pt-3">
                 <nav class="sidebar bg-light">
                     <ul class="nav flex-column">
-                                @if (User.IsInRole("Admin"))
-                                {
-                                    <partial name="_AdminNavPartial" />
-                                }
-                                else if (User.IsInRole("Student"))
-                                {
-                                    <partial name="_StudentNavPartial" />
-                                }
-                                else if (User.IsInRole("Mentor"))
-                                {
-                                    <partial name="_MentorNavPartial" />
-                                }
-                </ul>
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <partial name="_AdminNavPartial" />
+                        }
+                        else if (User.IsInRole("Student"))
+                        {
+                            <partial name="_StudentNavPartial" />
+                        }
+                        else if (User.IsInRole("Mentor"))
+                        {
+                            <partial name="_MentorNavPartial" />
+                        }
+                    </ul>
                 </nav>
             </div>
         }
         <main class="flex-grow-1 py-4 px-3">
-            <partial name="_Notification">
-            @RenderBody()
+                @RenderBody()
         </main>
 
         <!-- Logout Confirmation Modal -->
@@ -92,26 +92,59 @@
             </div>
         </div>
     </div>
-    @* <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2024 - SwpMentorBooking.Web - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+
+    <!-- Notification Modal -->
+    <div class="modal fade" id="notificationModal" tabindex="-1" aria-labelledby="notificationModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="notificationModalLabel"></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="notificationMessage"></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
         </div>
+    </div>
+    @* <footer class="border-top footer text-muted">
+    <div class="container">
+    &copy; 2024 - SwpMentorBooking.Web - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+    </div>
     </footer> *@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script>
+
         document.addEventListener('DOMContentLoaded', function () {
+            // Logout modal script
             document.getElementById('dropdownLogout').addEventListener('click', function (e) {
                 e.preventDefault();
                 var myModal = new bootstrap.Modal(document.getElementById('logoutModal'));
                 myModal.show();
-            })
+            });
+
             document.getElementById('confirmLogout').addEventListener('click', function () {
-                // Redirect to login page or perform other logout actions
                 window.location.href = '@Url.Action("Logout", "Account")';
             });
+
+            // Notification modal script
+            var errorMessage = '@TempData["error"]';
+            var successMessage = '@TempData["success"]';
+            if (errorMessage) {
+                document.getElementById('notificationModalLabel').textContent = 'Error';
+                document.getElementById('notificationMessage').textContent = errorMessage;
+                var notificationModal = new bootstrap.Modal(document.getElementById('notificationModal'));
+                notificationModal.show();
+            } else if (successMessage) {
+                document.getElementById('notificationModalLabel').textContent = 'Success';
+                document.getElementById('notificationMessage').textContent = successMessage;
+                var notificationModal = new bootstrap.Modal(document.getElementById('notificationModal'));
+                notificationModal.show();
+            }
         });
 
     </script>

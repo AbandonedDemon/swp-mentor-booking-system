@@ -1,75 +1,231 @@
-﻿@model MentorDetailVM
+﻿@model SwpMentorBooking.Web.ViewModels.MentorDetailVM
+<!DOCTYPE html>
+<html lang="en">
 
-<div class="card bg-purple text-white mb-4">
-    <div class="card-body">
-        <h1 class="text-center mb-0">Mentor Profile</h1>
-    </div>
-</div>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="~/css/profile.css" />
+</head>
 
-<div class="card-body border p-4">
-    <div class="row">
-        <div class="col-md-8">
-            <dl class="row">
-                <dt class="col-sm-3">Email:</dt>
-                <dd class="col-sm-9">@Model.Email</dd>
+<body>
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="card mb-4">
+                    <div class="card-body text-center">
+                        <img src="~/image/profile-default.png" alt="ProfilePhoto"
+                             class="rounded-circle img-fluid mb-3" style="width: 150px;">
+                        <h5 class="mb-2">@Model.FullName</h5>
+                        <h6 class="text-muted mb-2">About Me:</h6>
+                        <hr class="mx-auto" style="width: 50%;">
+                        <p class="text-muted mb-4">@Model.Description</p>
+                    </div>
+                </div>
 
-                <dt class="col-sm-3">Full Name:</dt>
-                <dd class="col-sm-9">@Model.FullName</dd>
+                <!-- Personal Information -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h5 class="card-title mb-0">Personal Information</h5>
+                            <button type="button" class="btn btn-outline-primary btn-sm">
+                                <a asp-action="UpdateProfile" asp-controller="Mentor">Edit</a>
+                            </button>
+                        </div>
 
-                <dt class="col-sm-3">Phone Number:</dt>
-                <dd class="col-sm-9">@Model.Phone</dd>
 
-                <dt class="col-sm-3">Gender:</dt>
-                <dd class="col-sm-9">@Model.Gender</dd>
+                        <div class="row mb-3">
+                            <div class="col-sm-4 d-flex align-items-center">
+                                <strong>Full Name: </strong>
+                            </div>
+                            <div class="col-sm-8">
+                                <p class="text-muted mb-0">@Model.FullName</p>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-sm-4 d-flex align-items-center">
+                                <strong>Gender: </strong>
+                            </div>
+                            <div class="col-sm-8">
+                                <p class="text-muted mb-0">@Model.Gender</p>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-sm-4 d-flex align-items-center">
+                                <strong>Email: </strong>
+                            </div>
+                            <div class="col-sm-8">
+                                <p class="text-muted mb-0">@Model.Email</p>
+                            </div>
+                        </div>
 
-                <dt class="col-sm-3">Main Programming Language:</dt>
-                <ul>
-                    @foreach (var item in Model.MainProgrammingLanguage)
-                    {
-                        <li class="col-sm-9">@item</li>
-                    }
-                </ul>
-                <dt class="col-sm-3">Alternative Programming Language:</dt>
-                <ul>
-                    @foreach (var item in Model.AltProgrammingLanguage)
-                    {
-                        <li class="col-sm-9">@item</li>
-                    }
-                </ul>
-                <dt class="col-sm-3">Framework:</dt>
-                <ul>
-                    @foreach (var item in Model.Framework)
-                    {
-                        <li class="col-sm-9">@item</li>
-                    }
-                </ul>
-                <dt class="col-sm-3">Education:</dt>
-                <ul>
-                    @foreach (var item in Model.Education)
-                    {
-                        <li class="col-sm-9">@item</li>
-                    }
-                </ul>
-                <dt class="col-sm-3">Additional Contact Info:</dt>
-                <ul>
-                    @foreach (var item in Model.AdditionalContactInfo)
-                    {
-                        <li class="col-sm-9">@item</li>
-                    }
-                </ul>
-                <dt class="col-sm-3">Booking Score:</dt>
-                <dd class="col-sm-9">@Model.BookingScore</dd>
+                        <div class="row mb-3">
+                            <div class="col-sm-4 d-flex align-items-center">
+                                <strong>Phone: </strong>
+                            </div>
+                            <div class="col-sm-8">
+                                <p class="text-muted mb-0">@Model.Phone</p>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-sm-4 d-flex align-items-center">
+                                <strong>Additional Contact Info: </strong>
+                            </div>
+                            <div class="col-sm-8">
+                                <ul class="list-unstyled mb-0">
+                                    @foreach (var item in Model.AdditionalContactInfo)
+                                    {
+                                        <li>@item</li>
+                                    }
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-sm-4 d-flex align-items-center">
+                                <strong>Booking Score:</strong>
+                            </div>
+                            <div class="col-sm-8">
+                                <span>@Model.BookingScore</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-                <dt class="col-sm-3">Description:</dt>
-                <dd class="col-sm-9">@Model.Description</dd>
-            </dl>
+                <div class="row">
+                    <!-- Programming Skills -->
+                    <div class="col-md-6">
+                        <div class="card h-100 shadow-sm">
+                            <div class="card-body">
+                                <h3 class="fs-4 fw-semibold mb-4">
+                                    Skills & Specialization
+                                </h3>
+                                <div class="skill-section">
+                                    <div class="skill-title">Main Programming Languages:</div>
+                                    <div class="d-flex flex-wrap gap-2">
+                                        @foreach (var item in Model.MainProgrammingLanguage)
+                                        {
+                                            <span class="skill-badge">@item</span>
+                                        }
+                                    </div>
+                                </div>
+                                <div class="skill-section">
+                                    <div class="skill-title">Alternative Programming Languages:</div>
+                                    <div class="d-flex flex-wrap gap-2">
+                                        @foreach (var item in Model.AltProgrammingLanguage)
+                                        {
+                                            <span class="skill-badge">@item</span>
+                                        }
+                                    </div>
+                                </div>
+                                <div class="skill-section">
+                                    <div class="skill-title">Frameworks:</div>
+                                    <div class="d-flex flex-wrap gap-2">
+                                        @if (Model.Framework != null && Model.Framework.Any())
+                                        {
+                                            @foreach (var item in Model.Framework)
+                                            {
+                                                <span class="skill-badge">@item</span>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">Not specified</span>
+                                        }
+                                    </div>
+                                </div>
+                                <div class="skill-section">
+                                    <div class="skill-title">Skills:</div>
+                                    <div class="d-flex flex-wrap gap-2">
+                                        @if (Model.Skills != null && Model.Skills.Any())
+                                        {
+                                            @foreach (var item in Model.Skills)
+                                            {
+                                                <span class="skill-badge">@item.Name</span>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">Not specified</span>
+                                        }
+                                    </div>
+                                </div>
+                                <div class="skill-section">
+                                    <div class="skill-title">Specialization:</div>
+                                    <div class="d-flex flex-wrap gap-2">
+                                        @if (Model.Specializations != null && Model.Specializations.Any())
+                                        {
+                                            @foreach (var item in Model.Specializations)
+                                            {
+                                                <span class="skill-badge">@item.Name</span>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">Not specified</span>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Education Information -->
+                    <div class="col-md-6">
+                        <div class="card mb-4 h-100">
+                            <div class="card-body">
+                                <h5 class="card-title mb-4">Education Information</h5>
+                                <dl class="row">
+                                    <dt class="col-sm-4">Education:</dt>
+                                    <dd class="col-sm-8">
+                                        <ul class="list-unstyled mb-0">
+                                            @foreach (var item in Model.Education)
+
+                                            {
+                                                <li>@item</li>
+                                            }
+                                        </ul>
+                                    </dd>
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-</div>
 
-<style>
-    .bg-purple {
-        background-color: #6f42c1;
+    @if (TempData["ValidateMessage"] != null)
+    {
+        <script type="text/javascript">
+            document.addEventListener("DOMContentLoaded", function () {
+                var myModal = new bootstrap.Modal(document.getElementById('validationModal'));
+                myModal.show();
+            });
+        </script>
     }
-</style>
 
+    <!-- Modal Structure -->
+    <div class="modal fade" id="validationModal" tabindex="-1" aria-labelledby="validationModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="validationModalLabel">Validation Message</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" style="text-align: center;">
+                    <h4 style="color: red">@TempData["ValidateMessage"]</h4>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

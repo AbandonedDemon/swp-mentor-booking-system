@@ -10,7 +10,7 @@ using SwpMentorBooking.Domain.Entities;
 using SwpMentorBooking.Infrastructure.Utils;
 
 
-namespace Demo.Controllers
+namespace SwpMentorBooking.Web.Controllers
 {
     public class AccountController : Controller
     {
@@ -66,17 +66,23 @@ namespace Demo.Controllers
                         {
                             AllowRefresh = true,
                             IsPersistent = model.RememberMe,
+                            ExpiresUtc = model.RememberMe ? DateTime.UtcNow.AddDays(3) : DateTime.UtcNow.AddMinutes(30),
                         };
 
                         await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
                             new ClaimsPrincipal(claimsIdentity), properties);
 
-                        if (user.IsFirstLogin)
+                        if (user.Role != "Admin")
                         {
-                            return RedirectToAction("ChangePassword", "Account");
+                            if (user.IsFirstLogin)
+                            {
+                                TempData["Password"] = user.Password;
+                                return RedirectToAction(nameof(ChangePassword));
+
+                            }
                         }
                         return RedirectToAction(nameof(RedirectBasedOnRole));
-                        //return RedirectToAction("Index", "Home");                
+                        //return RedirectToAction("Index", "Home");                    
                     }
                 }
                 ViewData["ValidateMessage"] = "User not found.";
@@ -97,11 +103,11 @@ namespace Demo.Controllers
             var userRole = HttpContext.User.FindFirst(ClaimTypes.Role).Value;
             if ("Admin".Equals(userRole))
             {
-                return RedirectToAction("Index", "Admin");
+                return RedirectToAction("ManageUser", "Admin");
             }
             if ("Mentor".Equals(userRole))
             {
-                return RedirectToAction("Index", "Mentor");
+                return RedirectToAction("ViewSchedule", "Mentor");
             }
             if (userRole.Equals("Student"))
             {
@@ -111,17 +117,18 @@ namespace Demo.Controllers
         }
 
         [Authorize]
-        [HttpGet]
+        [HttpGet("change-password")]
         public IActionResult ChangePassword()
         {
             var userEmail = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
             var user = _unitOfWork.User.Get(u => u.Email == userEmail);
+
             ViewBag.IsFirstLogin = user?.IsFirstLogin;
             return View();
         }
 
         [Authorize]
-        [HttpPost]
+        [HttpPost("change-password")]
         public IActionResult ChangePassword(ChangePasswordVM model)
         {
             if (ModelState.IsValid)
@@ -180,10 +187,48 @@ namespace Demo.Controllers
             // proceed to send the email
             await _utilService.Email.SendEmail(user.Email, subject, body);
 
-            TempData["success"] = "Password reset link has been sent to your email.";
             return View("ForgotPasswordConfirmation"); // Show a confirmation view
 
         }
+
+        // GET: Reset Password
+        [HttpGet("reset-password")]
+        public IActionResult ResetPassword(string email)
+        {
+            User user = _unitOfWork.User.Get(u => u.Email == email);
+
+            if (string.IsNullOrEmpty(email))
+            {
+                return BadRequest("Invalid request.");
+            }
+
+            var model = new ResetPasswordVM { Email = user.Email };
+            return View(model);
+        }
+
+        // POST: Reset Password (update password in DB)
+        [HttpPost("reset-password")]
+        public IActionResult ResetPassword(ResetPasswordVM model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var user = _unitOfWork.User.Get(u => u.Email.Equals(model.Email));
+            if (user == null)
+            {
+                return BadRequest("Invalid request.");
+            }
+
+            // Update user's password
+            user.Password = model.NewPassword;
+            _unitOfWork.User.Update(user);
+            _unitOfWork.Save();
+
+            return View("ResetPasswordConfirmation"); // Show confirmation view
+        }
+
 
         [Authorize]
         [HttpGet]
